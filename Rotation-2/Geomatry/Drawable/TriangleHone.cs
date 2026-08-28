@@ -1,6 +1,6 @@
 namespace Roation;
 
-public class TriangleHone(float pScale, Vector pPos): ObjBase(pScale, pPos) {
+public class TriangleHone: ObjBase {
 	private static readonly IEnumerable<Vector> DefaultPoints = [
 		new(-0.5f, -0.5f, -0.5f),
 		new(-0.5f, -0.5f, 0.5f),

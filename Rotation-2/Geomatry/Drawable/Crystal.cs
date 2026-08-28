@@ -1,6 +1,6 @@
 namespace Roation;
 
-public class Crystal(float pScale, Vector pPos): ObjBase(pScale, pPos) {
+public class Crystal: ObjBase {
 	private static readonly IEnumerable<Vector> DefaultPoints = [
 		new Vector(-0.5f, 0, -0.288f) * 0.612f,
 		new Vector(0.5f, 0, -0.288f) * 0.612f,

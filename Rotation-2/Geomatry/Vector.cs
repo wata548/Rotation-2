@@ -27,29 +27,26 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 		}
 	}
 	public readonly float Dot(Vector pOther) => X * pOther.X + Y * pOther.Y + Z * pOther.Z;
-	public readonly Vector Cross(Vector pOther) =>
-		new(Y * pOther.Z - Z * pOther.Y, Z * pOther.X - X * pOther.Z, X * pOther.Y - Y * pOther.X);
+	public readonly Vector Cross(Vector pOther) => new(
+		Y * pOther.Z - Z * pOther.Y,
+		Z * pOther.X - X * pOther.Z,
+		X * pOther.Y - Y * pOther.X
+	);
 	
-	public void EulerRotateX(Vector pAxis, float pDelta) {
-		var diff = this - pAxis;
-		var rad = (float)(pDelta * Math.PI / 180f);
+	public void EulerRotateX(float pDelta) {
+		var rad = pDelta * MathF.PI / 180f;
 		var (cos, sin) = (MathF.Cos(rad), MathF.Sin(rad));
-		Y = pAxis.Y + cos * diff.Y - sin * diff.Z;
-		Z = pAxis.Z + cos * diff.Z + sin * diff.Y;
+		(Y, Z) = (cos * Y - sin * Z, cos * Z + sin * Y);
 	}
-	public void EulerRotateZ(Vector pAxis, float pDelta) {
-		var diff = this - pAxis;
-		var rad = (float)(pDelta * Math.PI / 180f);
+	public void EulerRotateZ(float pDelta) {
+		var rad = pDelta * MathF.PI / 180f;
 		var (cos, sin) = (MathF.Cos(rad), MathF.Sin(rad));
-		X = pAxis.X + cos * diff.X - sin * diff.Y;
-		Y = pAxis.Y + cos * diff.Y + sin * diff.X;
+		(X, Y) = (cos * X - sin * Y, cos * Y + sin * X);
 	}
-	public void EulerRotateY(Vector pAxis, float pDelta) {
-		var diff = this - pAxis;
-		var rad = (float)(pDelta * Math.PI / 180f);
+	public void EulerRotateY(float pDelta) {
+		var rad = pDelta * MathF.PI / 180f;
 		var (cos, sin) = (MathF.Cos(rad), MathF.Sin(rad));
-		X = pAxis.X + cos * diff.X - sin * diff.Z;
-		Z = pAxis.Z + cos * diff.Z + sin * diff.X;
+		(X, Z) = (cos * X - sin * Z, cos * Z + sin * X);
 	}
 	public void Mapped(Func<float, float> pFunc) => (X, Y, Z) = (pFunc(X), pFunc(Y), pFunc(Z));
 	public readonly Vector Map(Func<float, float> pFunc) => new(pFunc(X), pFunc(Y), pFunc(Z));

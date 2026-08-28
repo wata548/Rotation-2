@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace Roation;
 
-public class Cube(float pScale, Vector pPos): ObjBase(pScale, pPos) {
+public class Cube: ObjBase {
 	private static readonly IEnumerable<Vector> DefaultPoints = [
 		new(-0.5f, -0.5f, -0.5f),
 		new(0.5f, -0.5f, -0.5f),

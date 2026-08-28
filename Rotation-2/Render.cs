@@ -6,10 +6,15 @@ public class Render {
 	private const int _startColor = 233;
 	private const int _endColor = 255;
 	private const int _colorCnt = _endColor - _startColor;
+	private float[]? _buffer = null;
+	private float[]? _faceNormal = null;
 	
 	public string Show(Setting pSetting, params IEnumerable<IDrawable> pObjs) {
 		var size = (int)(pSetting.ScreenSize.X * pSetting.ScreenSize.Y);
-		var buffer = new float[size];
+		_buffer ??= new float[size];
+		_faceNormal ??= new float[size];
+		Array.Fill(_buffer, 0);
+		Array.Fill(_faceNormal, 0);
 		var skipped = 0;
 		foreach (var obj in pObjs) {
 			foreach (var triangle in obj.GetTriangles()) {
@@ -17,13 +22,14 @@ public class Render {
 					skipped++;
 					continue;
 				}
-				
-				Fill(triangle, 0, 1);
-				Fill(triangle, 1, 0);
+
+				var darkness = triangle.Normal.Normalized.Dot(pSetting.ViewDirection);
+				Fill(triangle, 0, 1, darkness);
+				Fill(triangle, 1, 0, darkness);
 				for (float i = 0; i < 1; i += pSetting.Term) {
 					for (float j = 0; j < 1; j += pSetting.Term) {
 						if (i + j > 1) break;
-						Fill(triangle, i,j);
+						Fill(triangle, i,j, darkness);
 					}
 				}	
 			}
@@ -42,8 +48,8 @@ public class Render {
 					if (pSetting.FillContext) result.Append("\x1b[38;5;232m");
 				}
 				var value = -1;
-				if (buffer[i] != 0) {
-					value = (int)MathF.Round(Math.Clamp(buffer[i], 0, 1) * _colorCnt);
+				if (_faceNormal[i] < 0) {
+					value = (int)MathF.Round(-_faceNormal[i] * _colorCnt * (1 - pSetting.Fog / _buffer[i]));
 				}
 				if (value != prev) {
 					result.Append($"\x1b[48;5;{_startColor + value}m");
@@ -59,8 +65,9 @@ public class Render {
 			result.AppendLine($"\n\x1b[38;5;255mSkipped triangle cnt: {skipped}");
 			return result.ToString();
 		}
-		void Fill(Triangle pTriangle, float pU, float pV) {
+		void Fill(Triangle pTriangle, float pU, float pV, float pDarkness) {
 			var point = pTriangle.GetPoint(pU, pV);
+			point.Y *= -1;
 			var z = -point.Z;
 			if (!pSetting.Isolate) {
 				var ratio = pSetting.CameraDistance / (pSetting.CameraDistance - point.Z);
@@ -71,7 +78,10 @@ public class Render {
 				|| point.Y < 0 || point.Y >= pSetting.ScreenSize.Y)
 				return;
 			var coord = (int)point.X + (int)(pSetting.ScreenSize.X * point.Y);
-			buffer[coord] = MathF.Max(buffer[coord], 1f / (z + float.Epsilon));
+			var zInv = 1f / (z + float.Epsilon);
+			if (_buffer[coord] > zInv) return;
+			_buffer[coord] = zInv;
+			_faceNormal[coord] = pDarkness;
 		}
 	}
 }

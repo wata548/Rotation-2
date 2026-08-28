@@ -6,24 +6,20 @@ public struct Quaternion(float pW, Vector pV) {
 
 	public Quaternion() : this(1, Vector.Zero){}
 	
-	public static Quaternion GenerateWithAxisAndAngle(float pTheta, Vector pAxis, bool pNormalized = false) {
+	public static Quaternion ByAngleAxis(float pTheta, Vector pAxis, bool pNormalized = false) {
 		var half = pTheta * MathF.PI / 360f;
 		if (!pNormalized) pAxis = pAxis.Normalized;
 		return new(MathF.Cos(half), MathF.Sin(half) * pAxis);
 	}
 
-	public static Quaternion Euler(float pX, float pY, float pZ) =>
-		GenerateWithAxisAndAngle(pZ, Vector.Forward)
-		* GenerateWithAxisAndAngle(pY, Vector.Up)
-		* GenerateWithAxisAndAngle(pX, Vector.Right);
-
-	public Vector Rotate(Vector pP) {
-		var temp = this * pP;
-		var temp2 = Flip();
-		var temp3 = temp * temp2; 
-		return (this * pP * Flip()).V;
-	} 
+	public static Quaternion Euler(Vector pV) => Euler(pV.X, pV.Y, pV.Z);
 	
+	public static Quaternion Euler(float pX, float pY, float pZ) =>
+		ByAngleAxis(pZ, Vector.Forward)
+		* ByAngleAxis(pY, Vector.Up)
+		* ByAngleAxis(pX, Vector.Right);
+
+	public Vector Rotate(Vector pP) => (this * pP * Flip()).V;
 	public static Quaternion operator *(Quaternion pLhs, Quaternion pRhs) =>
 		new(pLhs.W * pRhs.W - pLhs.V.Dot(pRhs.V),
 			pLhs.V * pRhs.W + pLhs.W * pRhs.V + pLhs.V.Cross(pRhs.V)
