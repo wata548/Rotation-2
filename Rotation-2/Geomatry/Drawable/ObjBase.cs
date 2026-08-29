@@ -1,3 +1,5 @@
+using Microsoft.VisualBasic.CompilerServices;
+
 namespace Roation;
 
 public abstract class ObjBase: IDrawable {
@@ -27,39 +29,47 @@ public abstract class ObjBase: IDrawable {
 		}
 	} = new();
 
-	private bool _needUpdate = false; 
-	
-	protected readonly IReadOnlyList<Triangle> _triangles;
-	protected readonly IList<Wrapper<Vector>> _vertices;
+	private bool _needUpdate = false;
+
+	private IReadOnlyList<Triangle>? Triangles { get; set; } = null;
+	private IList<Wrapper<Vector>>? Vertices { get; set; } = null;
 	protected abstract IEnumerable<Vector> _defaultVertices { get; }
 	protected abstract IEnumerable<TriangleIdx> _triangleIndies { get; }
-	protected ObjBase() {
-		_vertices = _defaultVertices.Select(p => new Wrapper<Vector>(p))
-			.ToList();
-		
-		_triangles = _triangleIndies.Select(idxs => new Triangle(
-			_vertices[idxs.A],
-			_vertices[idxs.B],
-			_vertices[idxs.C])
+	private bool _initialized = false;
+
+	protected void Initializer() {
+		_initialized = true;
+		Vertices = _defaultVertices.Select(p => new Wrapper<Vector>(p))
+        			.ToList();
+        		
+		Triangles = _triangleIndies.Select(idxs => new Triangle(
+			Vertices[idxs.A],
+			Vertices[idxs.B],
+			Vertices[idxs.C])
 		).ToList();
+	}
+	protected ObjBase(bool pSkip = false) {
+		if(!pSkip) Initializer();
 	}
 
 	private void Refresh() {
+		if (!_initialized) throw new Exception("Need to call Initializer()");
 		if (!_needUpdate) return;
 		_needUpdate = false;
-		foreach (var (p, v) in _vertices.Zip(_defaultVertices)) {
+		foreach (var (p, v) in Vertices!.Zip(_defaultVertices)) {
 			p.V = Rotation.Rotate(v) * Scale + Pos;
 		}
 	}
 
 	public IEnumerable<Triangle> GetTriangles() {
 		Refresh();
-		return _triangles;
+		return Triangles!;
 	}
 	
 	[Obsolete]
 	public void Rotate(float pX, float pY, float pZ) {
-		foreach (var (p, v) in _vertices.Zip(_defaultVertices)) {
+		if (!_initialized) throw new Exception("Need to call Initializer()");
+		foreach (var (p, v) in Vertices!.Zip(_defaultVertices)) {
 			var t = v;
 			t.EulerRotateX(pX);
 			t.EulerRotateY(pY);

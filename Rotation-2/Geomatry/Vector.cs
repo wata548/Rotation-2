@@ -23,7 +23,7 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 	public readonly Vector Normalized {
 		get {
 			var dis = Distance;
-			return new(X / dis, Y / dis, Z / dis);
+			return new Vector(X, Y, Z) / dis;
 		}
 	}
 	public readonly float Dot(Vector pOther) => X * pOther.X + Y * pOther.Y + Z * pOther.Z;

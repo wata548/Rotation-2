@@ -9,7 +9,8 @@ public record Setting(
 	float FOV = 95, 
 	float Fog = 0.05f,
 	bool Isolate = false,
-	bool FillContext = false
+	bool FillContext = false,
+	bool ZBufferShading = false
 ) {
 	public readonly float Term = 1f / TriangleDetail;
 	public readonly Vector ScreenSize = ScreenRange * CoordDetail;

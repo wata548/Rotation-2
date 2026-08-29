@@ -49,7 +49,12 @@ public class Render {
 				}
 				var value = -1;
 				if (_faceNormal[i] < 0) {
-					value = (int)MathF.Round(-_faceNormal[i] * _colorCnt * (1 - pSetting.Fog / _buffer[i]));
+					if (!pSetting.ZBufferShading) {
+						value = (int)MathF.Round(-_faceNormal[i] * _colorCnt * (1 - pSetting.Fog / _buffer[i]));
+						value = Math.Clamp(value, 1, _colorCnt);
+					}
+					else
+						value = (int)MathF.Round(Math.Clamp(_buffer[i], 0, 1) * _colorCnt);
 				}
 				if (value != prev) {
 					result.Append($"\x1b[48;5;{_startColor + value}m");
@@ -61,18 +66,20 @@ public class Render {
 					? value == -1 ? "  " : $"{value:d02}"
 					: "  ");
 			}
-
-			result.AppendLine($"\n\x1b[38;5;255mSkipped triangle cnt: {skipped}");
+			result.Append("\n\x1b[38;5;255m");
+			result.AppendLine($"Skipped triangle cnt: {skipped}");
 			return result.ToString();
 		}
 		void Fill(Triangle pTriangle, float pU, float pV, float pDarkness) {
 			var point = pTriangle.GetPoint(pU, pV);
 			point.Y *= -1;
 			var z = -point.Z;
+			
 			if (!pSetting.Isolate) {
 				var ratio = pSetting.CameraDistance / (pSetting.CameraDistance - point.Z);
 				point *= ratio;	
 			}
+			
 			point = ((point - pSetting.OriginDelta) * pSetting.CoordDetail).Map(MathF.Round);
 			if (point.X < 0 || point.X >= pSetting.ScreenSize.X
 				|| point.Y < 0 || point.Y >= pSetting.ScreenSize.Y)
