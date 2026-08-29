@@ -10,21 +10,36 @@ public class FbxObj: ObjBase {
             PostProcessSteps.Triangulate 
             | PostProcessSteps.JoinIdenticalVertices
         );
-        _dv = file.Meshes.SelectMany(mesh => mesh.Vertices.Select(v => new Vector(v.X, v.Y, v.Z)));
-        var list = new List<TriangleIdx>();
+        var vList = new List<Vector>();
+        var tList = new List<TriangleIdx>();
         var num = 0;
-        foreach (var mesh in file.Meshes) {
-            var indices = mesh.GetIndices();
-            if (indices.Length % 3 != 0) throw new ArgumentException("indices count is strange");
-            for (int i = 0; i < (indices?.Length ?? 0) - 2; i+=3) {
-                list.Add(new(num + indices[i], num + indices[i + 1], num + indices[i + 2]));   
+        var stack = new Stack<(Node, Matrix4x4)>();
+        stack.Push((file.RootNode, Matrix4x4.Identity));
+        while (stack.Count > 0) {
+	        var (node, transform) = stack.Pop();
+	        var world = transform * node.Transform;
+            if (node.HasMeshes) {
+                var mesh = file.Meshes[node.MeshIndices[0]];
+                var indices = mesh.GetIndices();
+                if (indices.Length % 3 != 0) throw new ArgumentException("indices count is strange");
+                vList.AddRange(mesh.Vertices.Select(v => {
+                    var worldPos = world * v;
+                    return new Vector(worldPos.X, worldPos.Y, worldPos.Z);
+                }));
+                for (int i = 0; i < (indices?.Length ?? 0) - 2; i+=3) {
+                    tList.Add(new(num + indices[i], num + indices[i + 1], num + indices[i + 2]));   
+                }
+                num += mesh.VertexCount;
             }
-            
-            num += mesh.VertexCount;
+	        if (node.HasChildren) {
+		        foreach (var child in node.Children) {
+			        stack.Push((child, transform));
+		        }
+	        }
         }
-        
 
-        _dt = list;
+        _dv = vList;
+        _dt = tList;
         Initializer();
     }
 

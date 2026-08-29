@@ -22,9 +22,9 @@ public class TestScene: IScene {
         });
         */
         _objs.Add(new FbxObj("test.fbx") {
-            Pos = new(0, 0, -9),
-            Scale = 1f * Vector.One,
-            Rotation = Quaternion.Euler(-90, 0, 0)
+            Pos = new(0, -3, -7),
+            Scale = 0.03f * Vector.One,
+            Rotation = Quaternion.Euler(0, 0, 0)
         });
     }
     
