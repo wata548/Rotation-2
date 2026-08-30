@@ -3,22 +3,20 @@ using System.Text;
 namespace Roation;
 
 public class Render {
-	private const int _startColor = 233;
-	private const int _endColor = 255;
-	private const int _colorCnt = _endColor - _startColor;
-	private float[]? _buffer = null;
+	private const int _colorCnt = 255;
+	private float[]? _zBuffer = null;
 	private float[]? _faceNormal = null;
 	
 	public string Show(Setting pSetting, params IEnumerable<IDrawable> pObjs) {
 		var size = (int)(pSetting.ScreenSize.X * pSetting.ScreenSize.Y);
-		_buffer ??= new float[size];
+		_zBuffer ??= new float[size];
 		_faceNormal ??= new float[size];
-		Array.Fill(_buffer, 0);
+		Array.Fill(_zBuffer, 0);
 		Array.Fill(_faceNormal, 0);
 		var skipped = 0;
 		foreach (var obj in pObjs) {
 			foreach (var triangle in obj.GetTriangles()) {
-				if (!triangle.IsVisible(pSetting)) {
+				if (!pSetting.DoubleFace && !triangle.IsVisible(pSetting)) {
 					skipped++;
 					continue;
 				}
@@ -38,35 +36,41 @@ public class Render {
 		return GetResult();	
 
 		string GetResult() {
-			var prev = -1;
+			var prev = 0f;
 			var result = new StringBuilder();
 			result.Append("|");
 			for (int i = 0; i < size; i++) {
+				
 				if (i != 0 && i % pSetting.ScreenSize.X == 0) {
-					prev = -1;
-					result.Append($"\x1b[48;5;232m\x1b[38;5;255m|\n|");
-					if (pSetting.FillContext) result.Append("\x1b[38;5;232m");
+					prev = 0;
+					result.Append($"\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
+					if (pSetting.FillContext) result.Append("\x1b[38;2;0;0;0m");
 				}
-				var value = -1;
+				var value = 0f;
+				
 				if (_faceNormal[i] < 0) {
 					if (!pSetting.ZBufferShading) {
-						value = (int)MathF.Round(-_faceNormal[i] * _colorCnt * (1 - pSetting.Fog / _buffer[i]));
-						value = Math.Clamp(value, 1, _colorCnt);
+						value = -_faceNormal[i] * (1 - pSetting.Fog / _zBuffer[i]);
+						value = Math.Clamp(value, 0, 1);
 					}
 					else
-						value = (int)MathF.Round(Math.Clamp(_buffer[i], 0, 1) * _colorCnt);
+						value = Math.Clamp(_zBuffer[i], 0, 1);
 				}
-				if (value != prev) {
-					result.Append($"\x1b[48;5;{_startColor + value}m");
-					if (pSetting.FillContext) result.Append($"\x1b[38;5;{_startColor + value}m");
+				
+				if (Math.Abs(value - prev) > 1e-5f) {
+					var r = (int)(pSetting.Color.R * value);
+					var g = (int)(pSetting.Color.G * value);
+					var b = (int)(pSetting.Color.B * value);
+					result.Append($"\x1b[48;2;{r};{g};{b}m");
+					if (pSetting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");
 					prev = value;
 				}
 
 				result.Append(pSetting.FillContext
-					? value == -1 ? "  " : $"{value:d02}"
+					? value == 0 ? "  " : $"{(int)(100 * value):d02}"
 					: "  ");
 			}
-			result.Append("\n\x1b[38;5;255m");
+			result.Append("\n\x1b[38;2;255;255;255m");
 			result.AppendLine($"Skipped triangle cnt: {skipped}");
 			return result.ToString();
 		}
@@ -86,8 +90,8 @@ public class Render {
 				return;
 			var coord = (int)point.X + (int)(pSetting.ScreenSize.X * point.Y);
 			var zInv = 1f / (z + float.Epsilon);
-			if (_buffer[coord] > zInv) return;
-			_buffer[coord] = zInv;
+			if (_zBuffer[coord] > zInv) return;
+			_zBuffer[coord] = zInv;
 			_faceNormal[coord] = pDarkness;
 		}
 	}

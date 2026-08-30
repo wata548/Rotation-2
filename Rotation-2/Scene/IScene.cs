@@ -1,7 +1,7 @@
 namespace Roation;
 
 public interface IScene {
-    IEnumerable<ObjBase> Objs { get; }
+    IEnumerable<IDrawable> Objs { get; }
     string OtherData { get; }
     void Update(Setting pSetting);
 }

@@ -1,12 +1,17 @@
 namespace Roation;
 
-public class TestScene: IScene {
+public class LoadFbxScene: IScene {
 
     private List<ObjBase> _objs = new();
-    public IEnumerable<ObjBase> Objs => _objs; 
+    public IEnumerable<IDrawable> Objs => _objs; 
     public string OtherData { get; }
 
-    public TestScene() {
+    public LoadFbxScene() {
+        Console.Write("Enter target file(test.fbx): ");
+        var targetFile = Console.ReadLine();
+        targetFile = string.IsNullOrWhiteSpace(targetFile) ? "FBX/test.fbx" : "FBX/"+targetFile;
+        targetFile += targetFile.Contains(".fbx") ? "" : ".fbx";
+        
         /*
         _objs.Add(new TriangleHone {
             Pos = new(0, 4, -5),
@@ -21,10 +26,10 @@ public class TestScene: IScene {
             Scale = 4 * Vector.One		
         });
         */
-        _objs.Add(new FbxObj("test.fbx") {
+        _objs.Add(new FbxObj(targetFile) {
             Pos = new(0, -3, -7),
-            Scale = 0.03f * Vector.One,
-            Rotation = Quaternion.Euler(0, 0, 0)
+            Scale = 0.03f * new Vector(1, 1, 1),
+            Rotation = Quaternion.Euler(-12, 0, 0)
         });
     }
     

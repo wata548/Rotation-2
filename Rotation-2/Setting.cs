@@ -3,6 +3,7 @@ namespace Roation;
 public record Setting(
 	Vector ScreenRange,
 	Vector Origin,
+	Color Color,
 	float Frame = 20,
 	int CoordDetail = 4,
 	int TriangleDetail = 100,
@@ -10,7 +11,8 @@ public record Setting(
 	float Fog = 0.05f,
 	bool Isolate = false,
 	bool FillContext = false,
-	bool ZBufferShading = false
+	bool ZBufferShading = false,
+	bool DoubleFace = false
 ) {
 	public readonly float Term = 1f / TriangleDetail;
 	public readonly Vector ScreenSize = ScreenRange * CoordDetail;
@@ -20,3 +22,5 @@ public record Setting(
 	public readonly Vector CameraPos = new(Origin.X, Origin.Y, Origin.Z + 
 		/*CameraDistance*/ScreenRange.X / 2f / MathF.Tan(FOV / 2 * MathF.PI / 180f));
 }
+
+public record Color(int R = 255, int G = 255, int B = 255);

@@ -29,6 +29,6 @@ public struct Quaternion(float pW, Vector pV) {
 		new(-pLhs.V.Dot(pRhs),
 			pLhs.W * pRhs + pLhs.V.Cross(pRhs)
 		);
-
+	
 	public Quaternion Flip() => new(W, -V);
 }

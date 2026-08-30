@@ -12,16 +12,20 @@ public class Program {
 		
 		var setting = new Setting(
 			new(15, 15),
-			new(), 
+			Vector.Zero, 
+			//new(250, 213, 27), yellow
+			new Color(),
 			frame,
 			10, 
-			9,
+			50,
 			Fog: 0.1f,
 			FOV: 109,
 			Isolate: isolate,
-			FillContext: true
+			FillContext: true, 
+			ZBufferShading: true
 		);
-		var scene = new TestScene();
+		
+		var scene = new Rotation();
 		var logic = new Logic(setting, scene);	
 		
 		while (true) {

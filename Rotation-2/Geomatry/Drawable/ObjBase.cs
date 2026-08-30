@@ -65,6 +65,9 @@ public abstract class ObjBase: IDrawable {
 		Refresh();
 		return Triangles!;
 	}
+
+	[Obsolete]
+	public void Rotate(Vector pD) => Rotate(pD.X, pD.Y, pD.Z);
 	
 	[Obsolete]
 	public void Rotate(float pX, float pY, float pZ) {
