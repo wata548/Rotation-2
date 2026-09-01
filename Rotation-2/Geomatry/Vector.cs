@@ -81,5 +81,11 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 		new(lhs / rhs.X, lhs / rhs.Y, lhs / rhs.Z);
 	public static Vector operator /(Vector lhs, float rhs) =>
 		new(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs);
+
+	public static bool operator ==(Vector lhs, Vector rhs) =>
+		(lhs.X, lhs.Y, lhs.Z) == (rhs.X, rhs.Y, rhs.Z);
+
+	public static bool operator !=(Vector lhs, Vector rhs) => !(lhs == rhs);
+
 #endregion
 }

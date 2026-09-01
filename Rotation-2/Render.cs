@@ -1,31 +1,36 @@
 using System.Text;
+using System.Threading.Channels;
 
 namespace Roation;
 
 public class Render {
-	private const int _colorCnt = 255;
-	private float[]? _zBuffer = null;
-	private float[]? _faceNormal = null;
+	public readonly Channel<string> Outputs = Channel.CreateBounded<string>(5);
+	private readonly int _screenSize;
+	private readonly Setting _setting;
+	private readonly float[] _zBuffer;
+	private readonly float[] _darkness;
+
+	public Render(Setting pSetting) {
+		_setting = pSetting;
+		_screenSize = (int)(pSetting.ScreenSize.X * pSetting.ScreenSize.Y);
+		_zBuffer = new float[_screenSize];
+		_darkness = new float[_screenSize];
+	}
 	
-	public string Show(Setting pSetting, params IEnumerable<IDrawable> pObjs) {
-		var size = (int)(pSetting.ScreenSize.X * pSetting.ScreenSize.Y);
-		_zBuffer ??= new float[size];
-		_faceNormal ??= new float[size];
+	public async Task Update(params IEnumerable<IDrawable> pObjs) {
+		Array.Fill(_darkness, 0);
 		Array.Fill(_zBuffer, 0);
-		Array.Fill(_faceNormal, 0);
-		var skipped = 0;
+		var renderedTriangle = 0;
 		foreach (var obj in pObjs) {
 			foreach (var triangle in obj.GetTriangles()) {
-				if (!pSetting.DoubleFace && !triangle.IsVisible(pSetting)) {
-					skipped++;
-					continue;
-				}
+				if (!_setting.DoubleFace && !triangle.IsVisible(_setting)) continue;
+				renderedTriangle++;
 
-				var darkness = triangle.Normal.Normalized.Dot(pSetting.ViewDirection);
+				var darkness = triangle.Normal.Normalized.Dot(_setting.ViewDirection);
 				Fill(triangle, 0, 1, darkness);
 				Fill(triangle, 1, 0, darkness);
-				for (float i = 0; i < 1; i += pSetting.Term) {
-					for (float j = 0; j < 1; j += pSetting.Term) {
+				for (float i = 0; i < 1; i += _setting.Term) {
+					for (float j = 0; j < 1; j += _setting.Term) {
 						if (i + j > 1) break;
 						Fill(triangle, i,j, darkness);
 					}
@@ -33,24 +38,46 @@ public class Render {
 			}
 		}
 
-		return GetResult();	
-
-		string GetResult() {
-			var prev = 0f;
+		await SaveResult();
+		return;
+		
+		void Fill(Triangle pTriangle, float pU, float pV, float pDarkness) {
+			var point = pTriangle.GetPoint(pU, pV);
+			point.Y *= -1;
+			var z = -point.Z;
+			
+			if (!_setting.Isolate) {
+				var ratio = _setting.CameraDistance / (_setting.CameraDistance - point.Z);
+				point *= ratio;	
+			}
+			
+			point = ((point - _setting.OriginDelta) * _setting.CoordDetail).Map(MathF.Round);
+			if (point.X < 0 || point.X >= _setting.ScreenSize.X
+				|| point.Y < 0 || point.Y >= _setting.ScreenSize.Y)
+				return;
+			var coord = (int)point.X + (int)(_setting.ScreenSize.X * point.Y);
+			var zInv = 1f / (z + float.Epsilon);
+			if (_zBuffer[coord] > zInv) return;
+			_zBuffer[coord] = zInv;
+			_darkness[coord] = pDarkness;
+		}
+		async Task SaveResult() {
 			var result = new StringBuilder();
+			result.Clear();
+			var prev = 0f;
 			result.Append("|");
-			for (int i = 0; i < size; i++) {
+			for (int i = 0; i < _screenSize; i++) {
 				
-				if (i != 0 && i % pSetting.ScreenSize.X == 0) {
+				if (i != 0 && i % _setting.ScreenSize.X == 0) {
 					prev = 0;
-					result.Append($"\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
-					if (pSetting.FillContext) result.Append("\x1b[38;2;0;0;0m");
+					result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
+					if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");
 				}
 				var value = 0f;
 				
-				if (_faceNormal[i] < 0) {
-					if (!pSetting.ZBufferShading) {
-						value = -_faceNormal[i] * (1 - pSetting.Fog / _zBuffer[i]);
+				if (_darkness[i] < 0) {
+					if (!_setting.ZBufferShading) {
+						value = -_darkness[i] * (1 - _setting.Fog / _zBuffer[i]);
 						value = Math.Clamp(value, 0, 1);
 					}
 					else
@@ -58,41 +85,21 @@ public class Render {
 				}
 				
 				if (Math.Abs(value - prev) > 1e-5f) {
-					var r = (int)(pSetting.Color.R * value);
-					var g = (int)(pSetting.Color.G * value);
-					var b = (int)(pSetting.Color.B * value);
+					var r = (int)(_setting.Color.R * value);
+					var g = (int)(_setting.Color.G * value);
+					var b = (int)(_setting.Color.B * value);
 					result.Append($"\x1b[48;2;{r};{g};{b}m");
-					if (pSetting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");
+					if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");
 					prev = value;
 				}
 
-				result.Append(pSetting.FillContext
+				result.Append(_setting.FillContext
 					? value == 0 ? "  " : $"{(int)(100 * value):d02}"
 					: "  ");
 			}
 			result.Append("\n\x1b[38;2;255;255;255m");
-			result.AppendLine($"Skipped triangle cnt: {skipped}");
-			return result.ToString();
-		}
-		void Fill(Triangle pTriangle, float pU, float pV, float pDarkness) {
-			var point = pTriangle.GetPoint(pU, pV);
-			point.Y *= -1;
-			var z = -point.Z;
-			
-			if (!pSetting.Isolate) {
-				var ratio = pSetting.CameraDistance / (pSetting.CameraDistance - point.Z);
-				point *= ratio;	
-			}
-			
-			point = ((point - pSetting.OriginDelta) * pSetting.CoordDetail).Map(MathF.Round);
-			if (point.X < 0 || point.X >= pSetting.ScreenSize.X
-				|| point.Y < 0 || point.Y >= pSetting.ScreenSize.Y)
-				return;
-			var coord = (int)point.X + (int)(pSetting.ScreenSize.X * point.Y);
-			var zInv = 1f / (z + float.Epsilon);
-			if (_zBuffer[coord] > zInv) return;
-			_zBuffer[coord] = zInv;
-			_faceNormal[coord] = pDarkness;
+			result.AppendLine($"Calculated triangle count: {renderedTriangle}");
+			await Outputs.Writer.WriteAsync(result.ToString());
 		}
 	}
 }

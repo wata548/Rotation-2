@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using Assimp;
-
-namespace Roation;
+﻿namespace Roation;
 
 public class Program {
 	public static void Main() {
@@ -11,25 +8,26 @@ public class Program {
 		var isolate = !(Console.ReadLine()??"").Contains('n');
 		
 		var setting = new Setting(
-			new(15, 15),
+			new(8,8),
 			Vector.Zero, 
 			//new(250, 213, 27), yellow
 			new Color(),
 			frame,
-			10, 
-			50,
+			30, 
+			5,
 			Fog: 0.1f,
 			FOV: 109,
 			Isolate: isolate,
-			FillContext: true, 
-			ZBufferShading: true
+			FillContext: true,
+			ZBufferShading: false,
+			DoubleFace: false
 		);
 		
-		var scene = new Rotation();
+		var scene = new LoadFbxScene();
 		var logic = new Logic(setting, scene);	
 		
-		while (true) {
-			logic.Update();
-		}
+		logic.StartDataLoop();
+		logic.StartRenderLoop().Wait();
+		
 	}
 }

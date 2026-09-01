@@ -27,9 +27,9 @@ public class LoadFbxScene: IScene {
         });
         */
         _objs.Add(new FbxObj(targetFile) {
-            Pos = new(0, -3, -7),
+            Pos = new(0, -3, -3),
             Scale = 0.03f * new Vector(1, 1, 1),
-            Rotation = Quaternion.Euler(-12, 0, 0)
+            Rotation = Quaternion.Euler(0, 0, 0)
         });
     }
     
