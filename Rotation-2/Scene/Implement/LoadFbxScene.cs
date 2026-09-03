@@ -9,8 +9,8 @@ public class LoadFbxScene: IScene {
     public LoadFbxScene() {
         Console.Write("Enter target file(test.fbx): ");
         var targetFile = Console.ReadLine();
-        targetFile = string.IsNullOrWhiteSpace(targetFile) ? "FBX/test.fbx" : "FBX/"+targetFile;
-        targetFile += targetFile.Contains(".fbx") ? "" : ".fbx";
+        targetFile = string.IsNullOrWhiteSpace(targetFile) ? "Models/test.fbx" : "Models/"+targetFile;
+        targetFile += targetFile.Contains('.') ? "" : ".fbx";
         
         /*
         _objs.Add(new TriangleHone {

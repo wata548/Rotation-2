@@ -4,6 +4,8 @@ public class Program {
 	public static void Main() {
 		Console.Write("Frame? (60): ");
 		if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
+		Console.Write("Ascii? (y / N): ");
+		var ascii = (Console.ReadLine()??"").Contains('y');
 		Console.Write("Isolate? (Y / n): ");
 		var isolate = !(Console.ReadLine()??"").Contains('n');
 		
@@ -14,10 +16,11 @@ public class Program {
 			new Color(),
 			frame,
 			30, 
-			5,
+			1,
 			Fog: 0.1f,
 			FOV: 109,
 			Isolate: isolate,
+			UseColor: !ascii,
 			FillContext: true,
 			ZBufferShading: false,
 			DoubleFace: false

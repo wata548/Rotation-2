@@ -9,6 +9,7 @@ public class Render {
 	private readonly Setting _setting;
 	private readonly float[] _zBuffer;
 	private readonly float[] _darkness;
+	private const string DarknessString = " .;-=+*#%@";
 
 	public Render(Setting pSetting) {
 		_setting = pSetting;
@@ -65,13 +66,17 @@ public class Render {
 			var result = new StringBuilder();
 			result.Clear();
 			var prev = 0f;
+			var curPixel = "  ";
 			result.Append("|");
 			for (int i = 0; i < _screenSize; i++) {
 				
 				if (i != 0 && i % _setting.ScreenSize.X == 0) {
 					prev = 0;
-					result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
-					if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");
+					if (_setting.UseColor) {
+						result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
+						if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");	
+					}
+					else result.Append("|\n|");
 				}
 				var value = 0f;
 				
@@ -88,16 +93,20 @@ public class Render {
 					var r = (int)(_setting.Color.R * value);
 					var g = (int)(_setting.Color.G * value);
 					var b = (int)(_setting.Color.B * value);
-					result.Append($"\x1b[48;2;{r};{g};{b}m");
-					if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");
+					if (_setting.UseColor) {
+						result.Append($"\x1b[48;2;{r};{g};{b}m");
+						if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");	
+					}
 					prev = value;
+					if (!_setting.FillContext) curPixel = "  ";
+					else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * value):d02}";
+					else curPixel = new string(DarknessString[(int)(DarknessString.Length * value)], 2);
 				}
 
-				result.Append(_setting.FillContext
-					? value == 0 ? "  " : $"{(int)(100 * value):d02}"
-					: "  ");
+				result.Append(curPixel);
 			}
-			result.Append("\n\x1b[38;2;255;255;255m");
+			result.Append("\n");
+			if(_setting.UseColor) result.Append("\x1b[38;2;255;255;255m");
 			result.AppendLine($"Calculated triangle count: {renderedTriangle}");
 			await Outputs.Writer.WriteAsync(result.ToString());
 		}
