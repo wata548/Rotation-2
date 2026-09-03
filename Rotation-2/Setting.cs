@@ -6,16 +6,13 @@ public record Setting(
 	Color Color,
 	float Frame = 20,
 	int CoordDetail = 4,
-	int TriangleDetail = 100,
 	float FOV = 95,
 	float Fog = 0.05f,
 	bool Isolate = false,
 	bool FillContext = false,
 	bool UseColor = true,
-	bool ZBufferShading = false,
-	bool DoubleFace = false
+	bool ZBufferShading = false
 ) {
-	public readonly float Term = 1f / TriangleDetail;
 	public readonly Vector ScreenSize = ScreenRange * CoordDetail;
 	public readonly Vector OriginDelta = Origin - ScreenRange / 2;
 	public readonly Vector ViewDirection = new(0, 0, -1);

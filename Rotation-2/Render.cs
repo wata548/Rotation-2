@@ -24,14 +24,18 @@ public class Render {
 		var renderedTriangle = 0;
 		foreach (var obj in pObjs) {
 			foreach (var triangle in obj.GetTriangles()) {
-				if (!_setting.DoubleFace && !triangle.IsVisible(_setting)) continue;
+				if (!triangle.IsVisible(_setting)) continue;
 				renderedTriangle++;
 
-				var darkness = triangle.Normal.Normalized.Dot(_setting.ViewDirection);
+				var darkness = -triangle.Normal.Normalized.Dot(_setting.ViewDirection);
+				//count == 1 / (u term, v term)
+				var uTerm = 1f / (triangle.U.Distance * _setting.CoordDetail);
+				var vTerm = 1f / (triangle.V.Distance * _setting.CoordDetail);
+				if(darkness < 1e-5) continue;
 				Fill(triangle, 0, 1, darkness);
 				Fill(triangle, 1, 0, darkness);
-				for (float i = 0; i < 1; i += _setting.Term) {
-					for (float j = 0; j < 1; j += _setting.Term) {
+				for (float i = 0; i < 1; i += uTerm) {
+					for (float j = 0; j < 1; j += vTerm) {
 						if (i + j > 1) break;
 						Fill(triangle, i,j, darkness);
 					}
@@ -80,9 +84,9 @@ public class Render {
 				}
 				var value = 0f;
 				
-				if (_darkness[i] < 0) {
+				if (_darkness[i] > 0) {
 					if (!_setting.ZBufferShading) {
-						value = -_darkness[i] * (1 - _setting.Fog / _zBuffer[i]);
+						value = _darkness[i] * (1 - _setting.Fog / _zBuffer[i]);
 						value = Math.Clamp(value, 0, 1);
 					}
 					else

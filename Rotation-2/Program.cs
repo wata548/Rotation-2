@@ -1,6 +1,8 @@
 ﻿namespace Roation;
 
 public class Program {
+	public static Logic Logic;
+	
 	public static void Main() {
 		Console.Write("Frame? (60): ");
 		if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
@@ -15,22 +17,20 @@ public class Program {
 			//new(250, 213, 27), yellow
 			new Color(),
 			frame,
-			30, 
-			1,
+			50, 
 			Fog: 0.1f,
 			FOV: 109,
 			Isolate: isolate,
 			UseColor: !ascii,
-			FillContext: true,
-			ZBufferShading: false,
-			DoubleFace: false
+			FillContext: false,
+			ZBufferShading: false
 		);
 		
 		var scene = new LoadFbxScene();
-		var logic = new Logic(setting, scene);	
+		Logic = new Logic(setting, scene);	
 		
-		logic.StartDataLoop();
-		logic.StartRenderLoop().Wait();
+		Logic.StartDataLoop();
+		Logic.StartRenderLoop().Wait();
 		
 	}
 }
