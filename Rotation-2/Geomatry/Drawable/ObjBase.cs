@@ -1,6 +1,6 @@
 using Microsoft.VisualBasic.CompilerServices;
 
-namespace Roation;
+namespace Rotation;
 
 public abstract class ObjBase: IDrawable {
 	protected record struct TriangleIdx(int A, int B, int C);

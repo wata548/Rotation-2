@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation.Scene;
 
 public class LoadFbxScene: IScene {
 

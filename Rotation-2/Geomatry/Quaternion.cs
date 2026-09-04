@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation;
 
 public struct Quaternion(float pW, Vector pV) {
 	public float W { get; private set; } = pW;
@@ -20,6 +20,7 @@ public struct Quaternion(float pW, Vector pV) {
 		* ByAngleAxis(pX, Vector.Right);
 
 	public Vector Rotate(Vector pP) => (this * pP * Flip()).V;
+	public Quaternion Rotate(Quaternion pQ) => pQ * this;
 	public static Quaternion operator *(Quaternion pLhs, Quaternion pRhs) =>
 		new(pLhs.W * pRhs.W - pLhs.V.Dot(pRhs.V),
 			pLhs.V * pRhs.W + pLhs.W * pRhs.V + pLhs.V.Cross(pRhs.V)

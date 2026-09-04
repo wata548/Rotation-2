@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace Roation;
+namespace Rotation;
 
 public class Cube: ObjBase {
 	private static readonly IEnumerable<Vector> DefaultPoints = [

@@ -1,6 +1,6 @@
 using Assimp;
 
-namespace Roation;
+namespace Rotation;
 
 public class FbxObj: ObjBase {
 

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace Roation;
+namespace Rotation;
 
 public class Logic {
 	public Setting Setting { get; set; }

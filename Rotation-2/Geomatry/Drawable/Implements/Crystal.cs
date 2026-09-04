@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation;
 
 public class Crystal: ObjBase {
 	private static readonly IEnumerable<Vector> DefaultPoints = [

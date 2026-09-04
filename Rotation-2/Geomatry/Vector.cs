@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation;
 
 public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 	public float X { get; set; } = pX;
@@ -21,10 +21,7 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 	public readonly float SqrDistance => X * X + Y * Y + Z * Z;
 	public readonly float Distance => MathF.Sqrt(SqrDistance);
 	public readonly Vector Normalized {
-		get {
-			var dis = Distance;
-			return new Vector(X, Y, Z) / dis;
-		}
+		get => new Vector(X, Y, Z) / Distance;
 	}
 	public readonly float Dot(Vector pOther) => X * pOther.X + Y * pOther.Y + Z * pOther.Z;
 	public readonly Vector Cross(Vector pOther) => new(

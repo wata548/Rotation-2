@@ -1,7 +1,7 @@
 using System.Text;
 using System.Threading.Channels;
 
-namespace Roation;
+namespace Rotation;
 
 public class Render {
 	public readonly Channel<string> Outputs = Channel.CreateBounded<string>(5);
@@ -24,14 +24,15 @@ public class Render {
 		var renderedTriangle = 0;
 		foreach (var obj in pObjs) {
 			foreach (var triangle in obj.GetTriangles()) {
-				if (!triangle.IsVisible(_setting)) continue;
+				
+				var darkness = triangle.Darkness(_setting);
+				if (darkness < 1e-5) continue;
 				renderedTriangle++;
 
-				var darkness = -triangle.Normal.Normalized.Dot(_setting.ViewDirection);
 				//count == 1 / (u term, v term)
 				var uTerm = 1f / (triangle.U.Distance * _setting.CoordDetail);
 				var vTerm = 1f / (triangle.V.Distance * _setting.CoordDetail);
-				if(darkness < 1e-5) continue;
+				
 				Fill(triangle, 0, 1, darkness);
 				Fill(triangle, 1, 0, darkness);
 				for (float i = 0; i < 1; i += uTerm) {
@@ -103,7 +104,7 @@ public class Render {
 					}
 					prev = value;
 					if (!_setting.FillContext) curPixel = "  ";
-					else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * value):d02}";
+					else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * (value - 1e-5f)):d02}";
 					else curPixel = new string(DarknessString[(int)(DarknessString.Length * value)], 2);
 				}
 

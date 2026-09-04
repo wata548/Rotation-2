@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation.Scene;
 
 public class Rotation: IScene {
     private List<ObjBase> _objs = new();

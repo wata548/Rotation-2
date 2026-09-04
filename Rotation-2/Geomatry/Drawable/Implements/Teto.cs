@@ -1,4 +1,4 @@
-using Roation;
+using Rotation;
 
 public class Teto: ObjBase {
     protected override IEnumerable<Vector> _defaultVertices => _dv;

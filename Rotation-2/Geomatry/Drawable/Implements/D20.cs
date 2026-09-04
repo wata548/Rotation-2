@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation;
 
 public class D20: ObjBase {
     private const float A = 0.26286556f;

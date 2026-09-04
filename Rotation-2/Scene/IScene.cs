@@ -1,4 +1,4 @@
-namespace Roation;
+namespace Rotation;
 
 public interface IScene {
     IEnumerable<IDrawable> Objs { get; }

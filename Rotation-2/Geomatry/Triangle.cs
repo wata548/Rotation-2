@@ -1,5 +1,5 @@
 
-namespace Roation;
+namespace Rotation;
 
 public class Triangle: IDrawable {
 	public Triangle(params Wrapper<Vector>[] pVertices) {
@@ -12,15 +12,17 @@ public class Triangle: IDrawable {
 	public Wrapper<Vector> A { get; set; }
 	public Wrapper<Vector> B { get; set; }
 	public Wrapper<Vector> C { get; set; }
-	public Vector Normal => (B.V - A.V).Cross(C.V - A.V);
+	public Vector Normal => U.Cross(V).Normalized;
 	public Vector U => B.V - A.V;
 	public Vector V => C.V - A.V;
 	public Vector Middle => (A.V + B.V + C.V) / 3f;
 
-	public bool IsVisible(Setting pSetting) =>
-		pSetting.Isolate
-			? Normal.Dot(pSetting.ViewDirection) <= 0
-			: Normal.Dot(A.V - pSetting.CameraPos) <= 0f;
+	public float Darkness(Setting pSetting) =>
+		-Normal.Dot(pSetting.Isolate
+			? pSetting.ViewDirection
+			: (A.V - pSetting.CameraPos).Normalized
+		);
+		
 	
 	public Vector GetPoint(float pU, float pV) =>
 		(1 - pU - pV) * A.V + pU * B.V + pV * C.V;
