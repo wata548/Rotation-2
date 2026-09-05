@@ -14,13 +14,16 @@ public class LoadFbxScene: IScene {
         var targetFile = Console.ReadLine();
         targetFile = string.IsNullOrWhiteSpace(targetFile) ? "Models/test.fbx" : "Models/"+targetFile;
         targetFile += targetFile.Contains('.') ? "" : ".fbx";
+        Console.Write("Enter scale(0.03): ");
+        if(!float.TryParse(Console.ReadLine(), out var scale)) scale = 0.03f;
+        
         
         Console.Clear();
         Console.Write("NOW!, PLEASE ZOOM OUT QUICKLY!!!");
         
         _objs.Add(new FbxObj(targetFile) {
             Pos = new(0, -3, -3),
-            Scale = 0.03f * new Vector(1, 1, 1),
+            Scale = scale * Vector.One,
             Rotation = Quaternion.Euler(0, 0, 0)
         });
     }

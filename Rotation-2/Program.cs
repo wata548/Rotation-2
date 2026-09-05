@@ -6,6 +6,8 @@ public class Program {
     public static void Main() {
         Console.Write("Frame? (60): ");
         if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
+        Console.Write("Detail? (30): ");
+        if(!int.TryParse(Console.ReadLine()??"", out var detail)) detail = 30; 
         Console.Write("Ascii? (y / N): ");
         var ascii = (Console.ReadLine()??"").Contains('y');
         Console.Write("Isolate? (y / N): ");
@@ -22,7 +24,7 @@ public class Program {
             //new(250, 213, 27), yellow
             new Color(),
             frame,
-            20, 
+            detail, 
             Fog: 0.1f,
             FOV: 109,
             Isolate: isolate,
@@ -31,9 +33,11 @@ public class Program {
             ZBufferShading: false
         );
 		
+        
+        if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");
         var scene =  Activator.CreateInstance(sceneType, []) as IScene;
-        if (scene == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");
-        Logic = new Logic(setting, scene);	
+        if (sceneType == null) throw new ArgumentException($"{sceneName} isn't IScene type. Check again");
+        Logic = new Logic(setting, scene!);	
 		
         Logic.StartDataLoop();
         Logic.StartRenderLoop().Wait();

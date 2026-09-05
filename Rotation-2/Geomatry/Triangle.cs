@@ -7,22 +7,25 @@ public class Triangle: IDrawable {
 		A = pVertices[0];
 		B = pVertices[1];
 		C = pVertices[2];
+		NormalRecalculate();
 	}
 	
 	public Wrapper<Vector> A { get; set; }
 	public Wrapper<Vector> B { get; set; }
 	public Wrapper<Vector> C { get; set; }
-	public Vector Normal => U.Cross(V).Normalized;
+	public Vector Normal { get; set; }
 	public Vector U => B.V - A.V;
 	public Vector V => C.V - A.V;
 	public Vector Middle => (A.V + B.V + C.V) / 3f;
 
-	public float Darkness(Setting pSetting) =>
+	public void NormalRecalculate() => 
+		Normal = U.Cross(V).Normalized;
+	
+	public float Brightness(Setting pSetting) =>
 		-Normal.Dot(pSetting.Isolate
 			? pSetting.ViewDirection
-			: (A.V - pSetting.CameraPos).Normalized
+			: (Middle - pSetting.CameraPos).Normalized
 		);
-		
 	
 	public Vector GetPoint(float pU, float pV) =>
 		(1 - pU - pV) * A.V + pU * B.V + pV * C.V;

@@ -59,6 +59,10 @@ public abstract class ObjBase: IDrawable {
 		foreach (var (p, v) in Vertices!.Zip(_defaultVertices)) {
 			p.V = Rotation.Rotate(v) * Scale + Pos;
 		}
+
+		foreach (var triangle in Triangles!) {
+			triangle.NormalRecalculate();
+		}
 	}
 
 	public IEnumerable<Triangle> GetTriangles() {
