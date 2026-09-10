@@ -14,7 +14,7 @@ public class Render {
 
 	public Render(Setting pSetting) {
 		_setting = pSetting;
-		_screenSize = (int)(pSetting.ScreenSize.X * pSetting.ScreenSize.Y);
+		_screenSize = (int)pSetting.ScreenSize.X * (int)pSetting.ScreenSize.Y;
 		_zBuffer = new float[_screenSize];
 		_brightness = new float[_screenSize];
 	}
@@ -24,12 +24,12 @@ public class Render {
 		Array.Fill(_zBuffer, 0);
 		_renderedTriangleCnt = 0;
 		foreach (var obj in pObjs) {
-			foreach (var triangle in obj.GetTriangles()) {
+			foreach (var triangle in obj.Triangles) {
 				
 				var brightness = triangle.Brightness(_setting);
 				if (brightness < 1e-5) continue;
 				_renderedTriangleCnt++;
-
+				
 				//count == 1 / (u term, v term)
 				var uTerm = 1f / (triangle.U.Distance * _setting.CoordDetail);
 				var vTerm = 1f / (triangle.V.Distance * _setting.CoordDetail);
@@ -45,17 +45,21 @@ public class Render {
 			}
 		}
 		return;
-		
-		void Fill(Triangle pTriangle, float pU, float pV, float pDarkness) {
+
+		Vector ToCameraSpace(Vector pPos) {
+			var ratio = _setting.CameraDistance / (_setting.CameraDistance - pPos.Z);
+			return pPos * ratio;	
+		}
+
+		void Fill(Triangle pTriangle, float pU, float pV, float pBrightness) {
 			var point = pTriangle.GetPoint(pU, pV);
 			var fixedPoint = point; 
 			fixedPoint.Y *= -1;
 			var z = -fixedPoint.Z;
+
 			
-			if (!_setting.Isolate) {
-				var ratio = _setting.CameraDistance / (_setting.CameraDistance - fixedPoint.Z);
-				fixedPoint *= ratio;	
-			}
+			if (!_setting.Isolate)
+				fixedPoint = ToCameraSpace(fixedPoint);
 			
 			fixedPoint = ((fixedPoint - _setting.OriginDelta) * _setting.CoordDetail).Map(MathF.Round);
 			if (fixedPoint.X < 0 || fixedPoint.X >= _setting.ScreenSize.X
@@ -66,58 +70,57 @@ public class Render {
 			if (_zBuffer[coord] > zInv) return;
 			_zBuffer[coord] = zInv;
 			
-			if (_setting.Isolate)
-				_brightness[coord] = pDarkness;
-			else //need to recalculate brightness (it need each point position)
-				_brightness[coord] = -pTriangle.Normal.Dot((point - _setting.CameraPos).Normalized);
+			if (!_setting.Isolate)
+				pBrightness = -pTriangle.Normal.Dot((point - _setting.CameraPos).Normalized);
+			_brightness[coord] = pBrightness;
 		}
 		
 	}
 	public async Task SaveResult() {
-    			var result = new StringBuilder();
-    			var prev = 0f;
-    			var curPixel = "  ";
-    			result.Append("|");
-    			for (int i = 0; i < _screenSize; i++) {
+		var result = new StringBuilder();
+		var prev = 0f;
+		var curPixel = "  ";
+		result.Append("|");
+		for (int i = 0; i < _screenSize; i++) {
     				
-    				if (i != 0 && i % _setting.ScreenSize.X == 0) {
-    					prev = 0;
-    					if (_setting.UseColor) {
-    						result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
-    						if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");	
-    					}
-    					else result.Append("|\n|");
-    				}
-    				var value = 0f;
+			if (i != 0 && i % _setting.ScreenSize.X == 0) {
+				prev = 0;
+				if (_setting.UseColor) {
+					result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
+					if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");	
+				}
+				else result.Append("|\n|");
+			}
+			var value = 0f;
     				
-    				if (_brightness[i] > 0) {
-    					if (!_setting.ZBufferShading) {
-    						value = _brightness[i] * (1 - _setting.Fog / _zBuffer[i]);
-    						value = Math.Clamp(value, 0, 1);
-    					}
-    					else
-    						value = Math.Clamp(_zBuffer[i], 0, 1);
-    				}
+			if (_brightness[i] > 0) {
+				if (!_setting.ZBufferShading) {
+					value = _brightness[i] * (1 - _setting.Fog / _zBuffer[i]);
+					value = Math.Clamp(value, 0, 1);
+				}
+				else
+					value = Math.Clamp(_zBuffer[i], 0, 1);
+			}
     				
-    				if (Math.Abs(value - prev) > 1e-5f) {
-    					var r = (int)(_setting.Color.R * value);
-    					var g = (int)(_setting.Color.G * value);
-    					var b = (int)(_setting.Color.B * value);
-    					if (_setting.UseColor) {
-    						result.Append($"\x1b[48;2;{r};{g};{b}m");
-    						if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");	
-    					}
-    					prev = value;
-    					if (!_setting.FillContext) curPixel = "  ";
-    					else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * (value - 1e-5f)):d02}";
-    					else curPixel = new string(BrightnessString[(int)(BrightnessString.Length * value)], 2);
-    				}
+			if (Math.Abs(value - prev) > 1e-5f) {
+				var r = (int)(_setting.Color.R * value);
+				var g = (int)(_setting.Color.G * value);
+				var b = (int)(_setting.Color.B * value);
+				if (_setting.UseColor) {
+					result.Append($"\x1b[48;2;{r};{g};{b}m");
+					if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");	
+				}
+				prev = value;
+				if (!_setting.FillContext) curPixel = "  ";
+				else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * (value - 1e-5f)):d02}";
+				else curPixel = new string(BrightnessString[(int)(BrightnessString.Length * value)], 2);
+			}
     
-    				result.Append(curPixel);
-    			}
-    			result.Append("\n");
-    			if(_setting.UseColor) result.Append("\x1b[38;2;255;255;255m");
-    			result.AppendLine($"Calculated triangle count: {_renderedTriangleCnt}");
-    			await Outputs.Writer.WriteAsync(result.ToString());
-    		}
+			result.Append(curPixel);
+		}
+		result.Append("\n");
+		if(_setting.UseColor) result.Append("\x1b[38;2;255;255;255m");
+		result.AppendLine($"Calculated triangle count: {_renderedTriangleCnt}");
+		await Outputs.Writer.WriteAsync(result.ToString());
+	}
 }

@@ -2,9 +2,8 @@ using Assimp;
 
 namespace Rotation;
 
-public class FbxObj: ObjBase {
-
-    public FbxObj(string pPath): base(true) {
+public class FbxLoader {
+    public Mesh Load(string pPath) {
         var importer = new AssimpContext();
         var file = importer.ImportFile(pPath,
             PostProcessSteps.Triangulate 
@@ -38,15 +37,6 @@ public class FbxObj: ObjBase {
 	        }
         }
 
-        _dv = vList;
-        _dt = tList;
-        Initializer();
+        return new(vList, tList);
     }
-
-    private readonly IEnumerable<Vector> _dv;
-    private readonly IEnumerable<TriangleIdx> _dt;
-
-    protected override IEnumerable<Vector> _defaultVertices => _dv;
-    
-    protected override IEnumerable<TriangleIdx> _triangleIndies => _dt;
 }

@@ -1,14 +1,15 @@
 namespace Rotation.Scene;
 
 public class Rotation: IScene {
-    private List<ObjBase> _objs = new();
+    private List<Object> _objs = new();
     public IEnumerable<IDrawable> Objs => _objs;
     public string OtherData => "";
 
     public Rotation() {
-        _objs.Add(new Cube {
+        _objs.Add(new Object {
             Pos = new(4, 4, -5),
-            Scale = Vector.One * 5
+            Scale = Vector.One * 5,
+            Mesh = Sample.Sample.Cube()
         });
         /*_objs.Add(new Cube {
             Pos = new(-3, 0, -2)
@@ -17,7 +18,7 @@ public class Rotation: IScene {
 
     private Vector Sum = Vector.Zero;
     public void Update(Setting pSetting) {
-        _objs[0].Rotation *= Quaternion.Euler(5, 7, 0);
+       // _objs[0].Rotation *= Quaternion.Euler(5, 7, 0);
         var delta = new Vector(5, 7, 0);
         //_objs[1].Rotate(Sum += delta);
     }

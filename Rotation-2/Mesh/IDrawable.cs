@@ -3,5 +3,5 @@ using System.Collections.Generic;
 namespace Rotation;
 
 public interface IDrawable {
-	IEnumerable<Triangle> GetTriangles();
+	IEnumerable<Triangle> Triangles { get; }
 }

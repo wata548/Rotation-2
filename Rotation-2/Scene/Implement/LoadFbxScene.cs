@@ -2,7 +2,7 @@ namespace Rotation.Scene;
 
 public class LoadFbxScene: IScene {
 
-    private List<ObjBase> _objs = new();
+    private List<Object> _objs = new();
     public IEnumerable<IDrawable> Objs => _objs; 
     public string OtherData { get; }
     public float _speed = 360; 
@@ -20,11 +20,13 @@ public class LoadFbxScene: IScene {
         
         Console.Clear();
         Console.Write("NOW!, PLEASE ZOOM OUT QUICKLY!!!");
-        
-        _objs.Add(new FbxObj(targetFile) {
-            Pos = new(0, -3, -3),
+        var loader = new FbxLoader();
+        var mesh = loader.Load(targetFile);
+        _objs.Add( new Object {
+            Pos = new(0, -3, -5),
             Scale = scale * Vector.One,
-            Rotation = Quaternion.Euler(0, 0, 0)
+            Rotation = Quaternion.Euler(0, 0, 0),
+            Mesh = mesh
         });
     }
     

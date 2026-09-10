@@ -2,15 +2,16 @@ namespace Rotation.Scene;
 
 public class Test2Scene: IScene {
 
-    private List<ObjBase> _objs = new();
+    private List<Object> _objs = new();
     public IEnumerable<IDrawable> Objs => _objs;
     public string OtherData => "";
 
     public Test2Scene() {
-        _objs.Add(new Cube() {
+        _objs.Add(new Object {
            Pos = new(0, -5, -7) ,
            Scale = new(10f,1f,10f),
-           Rotation = Quaternion.Euler(0, 0, 0)
+           Rotation = Quaternion.Euler(0, 0, 0),
+           Mesh = Sample.Sample.Cube()
         });
     }
 

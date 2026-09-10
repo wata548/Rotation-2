@@ -18,8 +18,8 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 	
 #region Operators
 
-	public readonly float SqrDistance => X * X + Y * Y + Z * Z;
-	public readonly float Distance => MathF.Sqrt(SqrDistance);
+	public readonly float SqDistance => X * X + Y * Y + Z * Z;
+	public readonly float Distance => MathF.Sqrt(SqDistance);
 	public readonly Vector Normalized {
 		get => new Vector(X, Y, Z) / Distance;
 	}

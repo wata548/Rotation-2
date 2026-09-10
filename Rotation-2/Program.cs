@@ -21,7 +21,7 @@ public class Program {
         var setting = new Setting(
             new(13,13),
             Vector.Zero, 
-            //new(250, 213, 27), yellow
+            //new(250, 213, 27),
             new Color(),
             frame,
             detail, 
@@ -32,7 +32,6 @@ public class Program {
             FillContext: true,
             ZBufferShading: false
         );
-		
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");
         var scene =  Activator.CreateInstance(sceneType, []) as IScene;

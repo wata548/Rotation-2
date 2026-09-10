@@ -1,4 +1,3 @@
-
 namespace Rotation;
 
 public class Triangle: IDrawable {
@@ -31,6 +30,9 @@ public class Triangle: IDrawable {
 		(1 - pU - pV) * A.V + pU * B.V + pV * C.V;
 
 	public IEnumerable<Triangle> GetTriangles() => [this];
+
+	public IEnumerable<Triangle> Triangles => [this];
+
 
 	/*
 	public void RotateX(float pDelta) {
