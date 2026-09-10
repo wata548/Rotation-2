@@ -21,8 +21,6 @@ public class Program {
         var setting = new Setting(
             new(13,13),
             Vector.Zero, 
-            //new(250, 213, 27),
-            new Color(),
             frame,
             detail, 
             Fog: 0.1f,
@@ -34,7 +32,7 @@ public class Program {
         );
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");
-        var scene =  Activator.CreateInstance(sceneType, []) as IScene;
+        var scene =  Activator.CreateInstance(sceneType, setting) as IScene;
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't IScene type. Check again");
         Logic = new Logic(setting, scene!);	
 		

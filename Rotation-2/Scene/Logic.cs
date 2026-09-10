@@ -47,7 +47,7 @@ public class Logic {
 			if (pToken.IsCancellationRequested) break;
 			_stopWatch.Restart();
 			Scene.Update(Setting);
-			_render.Update(Scene.Objs);
+			_render.Update(Scene);
 			await _render.SaveResult();
 
 			var used = (int)_stopWatch.ElapsedMilliseconds;

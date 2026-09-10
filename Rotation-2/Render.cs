@@ -1,5 +1,6 @@
 using System.Text;
 using System.Threading.Channels;
+using Rotation.Light;
 
 namespace Rotation;
 
@@ -8,7 +9,7 @@ public class Render {
 	private readonly int _screenSize;
 	private readonly Setting _setting;
 	private readonly float[] _zBuffer;
-	private readonly float[] _brightness;
+	private readonly Color[] _light;
 	private const string BrightnessString = " .;-=+*#%@";
 	private int _renderedTriangleCnt = 0;
 
@@ -16,30 +17,34 @@ public class Render {
 		_setting = pSetting;
 		_screenSize = (int)pSetting.ScreenSize.X * (int)pSetting.ScreenSize.Y;
 		_zBuffer = new float[_screenSize];
-		_brightness = new float[_screenSize];
+		_light = new Color[_screenSize];
 	}
 	
-	public void Update(params IEnumerable<IDrawable> pObjs) {
-		Array.Fill(_brightness, 0);
+	public void Update(IScene pScene) {
+		Array.Fill(_light, new(0,0,0));
 		Array.Fill(_zBuffer, 0);
 		_renderedTriangleCnt = 0;
-		foreach (var obj in pObjs) {
+		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
 				
-				var brightness = triangle.Brightness(_setting);
-				if (brightness < 1e-5) continue;
+				var isBackFace = -triangle.Normal.Dot(_setting.Isolate
+					? _setting.ViewDirection
+					: (triangle.Middle - _setting.CameraPos).Normalized
+				);
+				
+				if (isBackFace < 1e-5) continue;
 				_renderedTriangleCnt++;
 				
 				//count == 1 / (u term, v term)
 				var uTerm = 1f / (triangle.U.Distance * _setting.CoordDetail);
 				var vTerm = 1f / (triangle.V.Distance * _setting.CoordDetail);
 				
-				Fill(triangle, 0, 1, brightness);
-				Fill(triangle, 1, 0, brightness);
+				Fill(triangle, 0, 1);
+				Fill(triangle, 1, 0);
 				for (float i = 0; i < 1; i += uTerm) {
 					for (float j = 0; j < 1; j += vTerm) {
 						if (i + j > 1) break;
-						Fill(triangle, i,j, brightness);
+						Fill(triangle, i,j);
 					}
 				}	
 			}
@@ -51,7 +56,7 @@ public class Render {
 			return pPos * ratio;	
 		}
 
-		void Fill(Triangle pTriangle, float pU, float pV, float pBrightness) {
+		void Fill(Triangle pTriangle, float pU, float pV) {
 			var point = pTriangle.GetPoint(pU, pV);
 			var fixedPoint = point; 
 			fixedPoint.Y *= -1;
@@ -69,51 +74,56 @@ public class Render {
 			var zInv = 1f / (z + 1e-6f);
 			if (_zBuffer[coord] > zInv) return;
 			_zBuffer[coord] = zInv;
-			
-			if (!_setting.Isolate)
-				pBrightness = -pTriangle.Normal.Dot((point - _setting.CameraPos).Normalized);
-			_brightness[coord] = pBrightness;
+
+			_light[coord] = new(0, 0, 0);
+			foreach (var light in pScene.Lights) {
+				_light[coord] = 1 - (1 - _light[coord]) * (1 - light.CalcColor(pTriangle, point));
+			}
 		}
 		
 	}
 	public async Task SaveResult() {
 		var result = new StringBuilder();
-		var prev = 0f;
+		Color prev = new(0,0,0);
 		var curPixel = "  ";
 		result.Append("|");
 		for (int i = 0; i < _screenSize; i++) {
     				
 			if (i != 0 && i % _setting.ScreenSize.X == 0) {
-				prev = 0;
+				prev = new(0,0,0);
 				if (_setting.UseColor) {
 					result.Append("\x1b[48;2;0;0;0m\x1b[38;2;255;255;255m|\n|");
 					if (_setting.FillContext) result.Append("\x1b[38;2;0;0;0m");	
 				}
 				else result.Append("|\n|");
 			}
-			var value = 0f;
-    				
-			if (_brightness[i] > 0) {
+			Color value = new(0,0, 0);
+			var strength = 0f;
+			if (_zBuffer[i] > 0) {
 				if (!_setting.ZBufferShading) {
-					value = _brightness[i] * (1 - _setting.Fog / _zBuffer[i]);
-					value = Math.Clamp(value, 0, 1);
+					strength  = 1 - _setting.Fog / _zBuffer[i];
+					strength = Math.Clamp(strength, 0, 1);
+					value = _light[i] * strength;
 				}
-				else
-					value = Math.Clamp(_zBuffer[i], 0, 1);
+				else {
+					strength = Math.Clamp(_zBuffer[i], 0, 1);
+					value = new(strength, strength, strength);
+				}
 			}
     				
-			if (Math.Abs(value - prev) > 1e-5f) {
-				var r = (int)(_setting.Color.R * value);
-				var g = (int)(_setting.Color.G * value);
-				var b = (int)(_setting.Color.B * value);
+			if (value != prev) {
 				if (_setting.UseColor) {
-					result.Append($"\x1b[48;2;{r};{g};{b}m");
-					if (_setting.FillContext) result.Append($"\x1b[38;2;{r};{g};{b}m");	
+					var colorString = $"2;{value.ByteR};{value.ByteG};{value.ByteB}m";
+					result.Append("\x1b[48;");
+					result.Append(colorString);
+					if (_setting.FillContext) {
+						result.Append("\x1b[38;");
+						result.Append(colorString);
+					}	
 				}
 				prev = value;
 				if (!_setting.FillContext) curPixel = "  ";
-				else if (_setting.UseColor) curPixel = value == 0 ? "  " : $"{(int)(100 * (value - 1e-5f)):d02}";
-				else curPixel = new string(BrightnessString[(int)(BrightnessString.Length * value)], 2);
+				else curPixel = new string(BrightnessString[(int)(BrightnessString.Length * strength)], 2);
 			}
     
 			result.Append(curPixel);

@@ -1,8 +1,11 @@
+using Rotation.Light;
+
 namespace Rotation.Scene;
 
 public class Rotation: IScene {
     private List<Object> _objs = new();
     public IEnumerable<IDrawable> Objs => _objs;
+    public IEnumerable<ILight> Lights => [];
     public string OtherData => "";
 
     public Rotation() {

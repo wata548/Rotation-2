@@ -3,7 +3,6 @@ namespace Rotation;
 public record Setting(
 	Vector ScreenRange,
 	Vector Origin,
-	Color Color,
 	float Frame = 20,
 	int CoordDetail = 4,
 	float FOV = 95,
@@ -20,5 +19,3 @@ public record Setting(
 	public readonly Vector CameraPos = new(Origin.X, Origin.Y, Origin.Z + 
 		/*CameraDistance*/ScreenRange.X / 2f / MathF.Tan(FOV / 2 * MathF.PI / 180f));
 }
-
-public record Color(int R = 255, int G = 255, int B = 255);

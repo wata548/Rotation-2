@@ -1,9 +1,12 @@
+using Rotation.Light;
+
 namespace Rotation.Scene;
 
 public class Test2Scene: IScene {
 
     private List<Object> _objs = new();
     public IEnumerable<IDrawable> Objs => _objs;
+    public IEnumerable<ILight> Lights => [];
     public string OtherData => "";
 
     public Test2Scene() {

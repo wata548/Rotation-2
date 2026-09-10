@@ -20,12 +20,6 @@ public class Triangle: IDrawable {
 	public void NormalRecalculate() => 
 		Normal = U.Cross(V).Normalized;
 	
-	public float Brightness(Setting pSetting) =>
-		-Normal.Dot(pSetting.Isolate
-			? pSetting.ViewDirection
-			: (Middle - pSetting.CameraPos).Normalized
-		);
-	
 	public Vector GetPoint(float pU, float pV) =>
 		(1 - pU - pV) * A.V + pU * B.V + pV * C.V;
 
