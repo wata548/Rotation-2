@@ -48,7 +48,7 @@ public class Logic {
 			_stopWatch.Restart();
 			Scene.Update(Setting);
 			_render.Update(Scene);
-			await _render.SaveResult();
+			await _render.SaveResult(Scene);
 
 			var used = (int)_stopWatch.ElapsedMilliseconds;
 			var remain = term - used;

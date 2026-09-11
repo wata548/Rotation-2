@@ -1,28 +1,27 @@
 using System.Text;
 using System.Threading.Channels;
-using Rotation.Light;
 
 namespace Rotation;
 
-public class Render {
+public partial class Render {
 	public readonly Channel<string> Outputs = Channel.CreateBounded<string>(5);
 	private readonly int _screenSize;
 	private readonly Setting _setting;
-	private readonly float[] _zBuffer;
-	private readonly Color[] _light;
+	private readonly PointInfo[] _pointInfo;
+	private readonly Color[] _colors;
 	private const string BrightnessString = " .;-=+*#%@";
 	private int _renderedTriangleCnt = 0;
 
 	public Render(Setting pSetting) {
 		_setting = pSetting;
 		_screenSize = (int)pSetting.ScreenSize.X * (int)pSetting.ScreenSize.Y;
-		_zBuffer = new float[_screenSize];
-		_light = new Color[_screenSize];
+		_pointInfo = new PointInfo[_screenSize];
+		_colors = new Color[_screenSize];
 	}
 	
 	public void Update(IScene pScene) {
-		Array.Fill(_light, new(0,0,0));
-		Array.Fill(_zBuffer, 0);
+		Array.Fill(_colors, new(0, 0,0));
+		Array.Fill(_pointInfo, new(0, 0,0,null));
 		_renderedTriangleCnt = 0;
 		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
@@ -61,7 +60,6 @@ public class Render {
 			var fixedPoint = point; 
 			fixedPoint.Y *= -1;
 			var z = -fixedPoint.Z;
-
 			
 			if (!_setting.Isolate)
 				fixedPoint = ToCameraSpace(fixedPoint);
@@ -72,24 +70,12 @@ public class Render {
 				return;
 			var coord = (int)fixedPoint.X + (int)(_setting.ScreenSize.X * fixedPoint.Y);
 			var zInv = 1f / (z + 1e-6f);
-			if (_zBuffer[coord] > zInv) return;
-			_zBuffer[coord] = zInv;
-
-			if (!_setting.UseColor) return;
-			_light[coord] = _setting.DefaultColor;
-			foreach (var light in pScene.Lights) {
-				_light[coord] = _setting.LightProcessType switch {
-					LightProcessType.Screen => _light[coord].Screen(light.CalcColor(pTriangle, point)),
-					LightProcessType.Overlay => _light[coord].Overlay(light.CalcColor(pTriangle, point)),
-					LightProcessType.SoftLight => _light[coord].SoftLight(light.CalcColor(pTriangle, point)),
-					LightProcessType.HardLight => _light[coord].HardLight(light.CalcColor(pTriangle, point)),
-					_ => _light[coord]
-				};
-			}
+			if (_pointInfo[coord].ZInv > zInv) return;
+			_pointInfo[coord] = new(zInv, pU, pV, pTriangle);
 		}
 	}
 	
-	public async Task SaveResult() {
+	public async Task SaveResult(IScene pScene) {
 		var result = new StringBuilder();
 		Color prev = new(0,0,0);
 		var curPixel = "  ";
@@ -106,14 +92,26 @@ public class Render {
 			}
 			Color value = new(0,0, 0);
 			var strength = 0f;
-			if (_zBuffer[i] > 0) {
-				if (!_setting.ZBufferShading) {
-					strength  = 1 - _setting.Fog / _zBuffer[i];
+			if (_pointInfo[i].ZInv > 0) {
+				if (!_setting.ZBufferShading && _pointInfo[i].Triangle != null) {
+					strength  = 1 - _setting.Fog / _pointInfo[i].ZInv;
 					strength = Math.Clamp(strength, 0, 1);
-					value = _light[i] * strength;
+					var color = _setting.DefaultColor;
+					var point = _pointInfo[i].Triangle!.GetPoint(_pointInfo[i].U, _pointInfo[i].V);
+					foreach (var light in pScene.Lights) {
+						var lightColor = light.CalcColor(_pointInfo[i].Triangle!, point);
+						color = _setting.LightProcessType switch {
+							LightProcessType.Screen => color.Screen(lightColor),
+							LightProcessType.Overlay => color.Overlay(lightColor),
+							LightProcessType.SoftLight => color.SoftLight(lightColor),
+							LightProcessType.HardLight => color.HardLight(lightColor),
+							_ => color
+						};
+					}
+					value = color * strength;
 				}
 				else {
-					strength = Math.Clamp(_zBuffer[i], 0, 1);
+					strength = Math.Clamp(_pointInfo[i].ZInv, 0, 1);
 					value = new(strength, strength, strength);
 				}
 			}
