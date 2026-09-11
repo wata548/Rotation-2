@@ -17,10 +17,11 @@ public class Program {
         if (string.IsNullOrWhiteSpace(sceneName))
 	        sceneName = "LoadFbxScene";
         var sceneType = Type.GetType($"Rotation.Scene.{sceneName}");
-		
+
         var setting = new Setting(
-            new(13,13),
-            Vector.Zero, 
+	        new(13, 13),
+	        Vector.Zero,
+	        new("cccccc"),
             frame,
             detail, 
             Fog: 0.1f,
@@ -28,7 +29,8 @@ public class Program {
             Isolate: isolate,
             UseColor: !ascii,
             FillContext: true,
-            ZBufferShading: false
+            ZBufferShading: false,
+	        LightProcessType: LightProcessType.SoftLight
         );
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");

@@ -3,6 +3,7 @@ namespace Rotation;
 public record Setting(
 	Vector ScreenRange,
 	Vector Origin,
+	Color DefaultColor,
 	float Frame = 20,
 	int CoordDetail = 4,
 	float FOV = 95,
@@ -10,7 +11,8 @@ public record Setting(
 	bool Isolate = false,
 	bool FillContext = false,
 	bool UseColor = true,
-	bool ZBufferShading = false
+	bool ZBufferShading = false,
+	LightProcessType LightProcessType = LightProcessType.Screen
 ) {
 	public readonly Vector ScreenSize = ScreenRange * CoordDetail;
 	public readonly Vector OriginDelta = Origin - ScreenRange / 2;
@@ -18,4 +20,8 @@ public record Setting(
 	public readonly float CameraDistance = ScreenRange.X / 2f / MathF.Tan(FOV / 2 * MathF.PI / 180f);
 	public readonly Vector CameraPos = new(Origin.X, Origin.Y, Origin.Z + 
 		/*CameraDistance*/ScreenRange.X / 2f / MathF.Tan(FOV / 2 * MathF.PI / 180f));
+}
+
+public enum LightProcessType {
+	Screen, HardLight, SoftLight, Overlay
 }

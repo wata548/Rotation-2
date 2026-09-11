@@ -75,13 +75,20 @@ public class Render {
 			if (_zBuffer[coord] > zInv) return;
 			_zBuffer[coord] = zInv;
 
-			_light[coord] = new(0, 0, 0);
+			if (!_setting.UseColor) return;
+			_light[coord] = _setting.DefaultColor;
 			foreach (var light in pScene.Lights) {
-				_light[coord] = 1 - (1 - _light[coord]) * (1 - light.CalcColor(pTriangle, point));
+				_light[coord] = _setting.LightProcessType switch {
+					LightProcessType.Screen => _light[coord].Screen(light.CalcColor(pTriangle, point)),
+					LightProcessType.Overlay => _light[coord].Overlay(light.CalcColor(pTriangle, point)),
+					LightProcessType.SoftLight => _light[coord].SoftLight(light.CalcColor(pTriangle, point)),
+					LightProcessType.HardLight => _light[coord].HardLight(light.CalcColor(pTriangle, point)),
+					_ => _light[coord]
+				};
 			}
 		}
-		
 	}
+	
 	public async Task SaveResult() {
 		var result = new StringBuilder();
 		Color prev = new(0,0,0);
