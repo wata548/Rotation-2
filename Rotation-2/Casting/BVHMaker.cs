@@ -1,15 +1,6 @@
 namespace Rotation.Ray;
 
 public partial class BVH {
-    private class AABBNode {
-        public int TriangleCnt { get; set; }
-        public int LeftIdx { get; set; }
-        public int RightIdx => LeftIdx + 1;
-        public AABB AABB { get; set; } = new();
-        public TriangleIdx? Triangle { get; set; }
-    }
-
-    private record DevideRequset(int NodeIdx, int TriangleIdx);
     private enum Axis{X,Y,Z}
     
     public BVH(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies) {
@@ -19,30 +10,25 @@ public partial class BVH {
         var aabbs = new List<AABBNode> {
             new() { TriangleCnt= pTriangleIndies.Count }
         };
+        if (aabbs[0].IsLeaf) throw new NotImplementedException("Hmm.... triangle count is very few");
 
-        var stack = new Stack<DevideRequset>();
-        stack.Push(new(0, 0));
+        var stack = new Stack<int>();
+        stack.Push(0);
         
         while (stack.Count > 0) {
-            var req = stack.Pop();
-            var triangleCnt = aabbs[req.NodeIdx].TriangleCnt;
+            var idx = stack.Pop();
+            var node = aabbs[idx];
+            var triangleCnt = aabbs[idx].TriangleCnt;
             
-            //register triangle
-            if (triangleCnt == 1) {
-                aabbs[req.NodeIdx].Triangle = pTriangleIndies[req.TriangleIdx];
-                continue;
-            }
-            
-            //generate two children
             var term = (int)MathF.Floor(MathF.Sqrt(triangleCnt));
             var bestCenter = Vector.Zero;
             var bestAxis = Axis.X;
             var minHeuristic = float.MaxValue;
             for (int i = 0; i < triangleCnt; i += term) {
                 
-                var center = centers[req.TriangleIdx + i];
+                var center = centers[node.TriangleIdx + i];
                 for (var axis = Axis.X; axis <= Axis.Z; axis++) {
-                    var temp = SurfaceAreaHeuristic(center, axis, req, term);
+                    var temp = SurfaceAreaHeuristic(center, axis, node, term);
                     if (minHeuristic > temp) {
                         minHeuristic = temp;
                         bestAxis = axis;
@@ -51,9 +37,9 @@ public partial class BVH {
                 }
             }
 
-            aabbs[req.NodeIdx].LeftIdx = aabbs.Count;
-            var start = req.TriangleIdx;
-            var end = req.TriangleIdx + triangleCnt - 1;
+            aabbs[idx].LeftIdx = aabbs.Count;
+            var start = node.TriangleIdx;
+            var end = node.TriangleIdx + triangleCnt - 1;
             var smaller = new AABBNode();
             var bigger = new AABBNode();
             
@@ -92,10 +78,12 @@ public partial class BVH {
             }
             
             
-            stack.Push(new(aabbs.Count, req.TriangleIdx));
             aabbs.Add(smaller);
-            stack.Push(new(aabbs.Count, start));
+            if (!aabbs[^1].IsLeaf)
+                stack.Push(aabbs.Count - 1);
             aabbs.Add(bigger);
+            if(!aabbs[^1].IsLeaf)
+                stack.Push(aabbs.Count - 1);
         }
 
         aabbs[0].AABB = new(aabbs[1].AABB, aabbs[2].AABB);
@@ -116,21 +104,21 @@ public partial class BVH {
                 _ => throw new AggregateException()
             };
         
-        float SurfaceAreaHeuristic(Vector pPos, Axis pAxis, DevideRequset pReq, int pTerm) {
-            var triangleCnt = aabbs[pReq.NodeIdx].TriangleCnt;
+        float SurfaceAreaHeuristic(Vector pPos, Axis pAxis, AABBNode pNode, int pTerm) {
+            var triangleCnt = pNode.TriangleCnt;
             var big = new AABB();
             var small = new AABB();
             var bigCnt = 0;
             var smallCnt = 0;
             var pos = GetAxis(pPos, pAxis);
             for (int i = 0; i < triangleCnt; i += pTerm) {
-                if (pos < GetAxis(centers[pReq.TriangleIdx + i], pAxis)) {
+                if (pos < GetAxis(centers[pNode.TriangleIdx + i], pAxis)) {
                     bigCnt++;
-                    big.Expand(pVertices, pTriangleIndies[pReq.TriangleIdx + i]);
+                    big.Expand(pVertices, pTriangleIndies[pNode.TriangleIdx + i]);
                 }
                 else {
                     smallCnt++;
-                    small.Expand(pVertices, pTriangleIndies[pReq.TriangleIdx + i]);
+                    small.Expand(pVertices, pTriangleIndies[pNode.TriangleIdx + i]);
                 }
             }
 

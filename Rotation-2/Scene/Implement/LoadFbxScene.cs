@@ -29,14 +29,14 @@ public class LoadFbxScene: IScene {
 		Console.Clear();
 		Console.Write("NOW!, PLEASE ZOOM OUT QUICKLY!!!");
 		var loader = new FbxLoader();
-		var mesh = loader.Load(targetFile, true);
+		var mesh = loader.Load(targetFile);
 		_objs.Add( new Object {
 			Pos = new(0, -3, -5),
 			Scale = scale * Vector.One,
 			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = mesh
 		});
-		var bvh = new BVH(_objs[0].Mesh!.Vertices, _objs[0].Mesh!.TriangleIndies.ToList());
+		var temp = (mesh as Mesh)!.BVH;
 		/*_objs.Add( new Object {
 			Pos = new(0, 0, -6),
 			Scale = new(30, 30, 1),

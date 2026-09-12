@@ -5,21 +5,13 @@ namespace Rotation;
 
 public interface IMesh {
     IReadOnlyList<Vector> Vertices { get; }
-    IEnumerable<TriangleIdx> TriangleIndies { get; }
+    IReadOnlyList<TriangleIdx> TriangleIndies { get; }
 }
 
 public class Mesh(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies): IMesh {
     public IReadOnlyList<Vector> Vertices { get; } = pVertices;
-    public IEnumerable<TriangleIdx> TriangleIndies { get; } = pTriangleIndies;
+    public IReadOnlyList<TriangleIdx> TriangleIndies => _triangleIdxes;
+    private readonly List<TriangleIdx> _triangleIdxes = pTriangleIndies;
+    public BVH BVH => _bvh ??= new BVH(Vertices, _triangleIdxes);
+    private BVH? _bvh = null;
 }
-public class CollisionMesh: IMesh {
-    public IReadOnlyList<Vector> Vertices { get; }
-    public IEnumerable<TriangleIdx> TriangleIndies { get; }
-    public readonly BVH BVH;
-
-    public CollisionMesh(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies) {
-        BVH = new(pVertices, pTriangleIndies);
-        Vertices = pVertices;
-        TriangleIndies = pTriangleIndies;
-    }
-} 

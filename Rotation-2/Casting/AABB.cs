@@ -1,6 +1,6 @@
 namespace Rotation.Ray;
 
-public class AABB {
+public struct AABB {
 	public Vector Min { get; private set; }
 	public Vector Max { get; private set; }
 
@@ -63,9 +63,4 @@ public class AABB {
 		var lenght = Max - Min;
 		return 2 * (lenght.X * lenght.Y + lenght.Y * lenght.Z + lenght.X * lenght.Z);
 	}
-	
-	public bool IsIn(Ray pRay, ITransform pTransform) {
-		return true;
-	}
-		
 }

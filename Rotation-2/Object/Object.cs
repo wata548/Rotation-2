@@ -78,7 +78,7 @@ public class Object: IDrawable, ITransform {
 		_needUpdate = false;
 		
 		foreach (var (p, v) in _vertices.Zip(Mesh.Vertices)) {
-			p.V = Rotation.Rotate(v) * Scale + Pos;
+			p.V = this.ApplyTransform(v);
 		}
 
 		foreach (var triangle in _triangles) {

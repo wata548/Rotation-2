@@ -3,7 +3,7 @@ using Assimp;
 namespace Rotation;
 
 public class FbxLoader {
-    public IMesh Load(string pPath, bool pAllowCollision) {
+    public IMesh Load(string pPath) {
         var importer = new AssimpContext();
         var file = importer.ImportFile(pPath,
             PostProcessSteps.Triangulate 
@@ -37,7 +37,6 @@ public class FbxLoader {
 	        }
         }
 
-        if (pAllowCollision) return new CollisionMesh(vList, tList);
         return new Mesh(vList, tList);
     }
 }
