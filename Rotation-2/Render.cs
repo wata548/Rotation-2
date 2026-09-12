@@ -94,10 +94,11 @@ public partial class Render {
 			var strength = 0f;
 			if (_pointInfo[i].ZInv > 0) {
 				if (!_setting.ZBufferShading && _pointInfo[i].Triangle != null) {
-					strength  = 1 - _setting.Fog / _pointInfo[i].ZInv;
-					strength = Math.Clamp(strength, 0, 1);
 					var color = _setting.DefaultColor;
 					var point = _pointInfo[i].Triangle!.GetPoint(_pointInfo[i].U, _pointInfo[i].V);
+					strength  = 1 + _setting.Fog * point.Z;
+					strength = Math.Clamp(strength, 0, 1);
+					
 					foreach (var light in pScene.Lights) {
 						var lightColor = light.CalcColor(_pointInfo[i].Triangle!, point);
 						color = _setting.LightProcessType switch {

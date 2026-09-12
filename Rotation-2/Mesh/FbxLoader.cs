@@ -3,7 +3,7 @@ using Assimp;
 namespace Rotation;
 
 public class FbxLoader {
-    public Mesh Load(string pPath) {
+    public IMesh Load(string pPath, bool pAllowCollision) {
         var importer = new AssimpContext();
         var file = importer.ImportFile(pPath,
             PostProcessSteps.Triangulate 
@@ -19,13 +19,13 @@ public class FbxLoader {
 	        var world = transform * node.Transform;
             if (node.HasMeshes) {
                 var mesh = file.Meshes[node.MeshIndices[0]];
-                var indices = mesh.GetIndices();
+                var indices = mesh.GetIndices()!;
                 if (indices.Length % 3 != 0) throw new ArgumentException("indices count is strange");
                 vList.AddRange(mesh.Vertices.Select(v => {
                     var worldPos = world * v;
                     return new Vector(worldPos.X, worldPos.Y, worldPos.Z);
                 }));
-                for (int i = 0; i < (indices?.Length ?? 0) - 2; i+=3) {
+                for (int i = 0; i < indices.Length - 2; i+=3) {
                     tList.Add(new(num + indices[i], num + indices[i + 1], num + indices[i + 2]));   
                 }
                 num += mesh.VertexCount;
@@ -37,6 +37,7 @@ public class FbxLoader {
 	        }
         }
 
-        return new(vList, tList);
+        if (pAllowCollision) return new CollisionMesh(vList, tList);
+        return new Mesh(vList, tList);
     }
 }

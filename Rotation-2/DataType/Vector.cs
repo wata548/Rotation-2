@@ -80,9 +80,18 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 		new(lhs.X / rhs, lhs.Y / rhs, lhs.Z / rhs);
 
 	public static bool operator ==(Vector lhs, Vector rhs) =>
-		(lhs.X, lhs.Y, lhs.Z) == (rhs.X, rhs.Y, rhs.Z);
+		lhs.Equals(rhs);
+	public static bool operator !=(Vector lhs, Vector rhs) => 
+		!(lhs == rhs);
+	
+	public bool Equals(Vector pRhs) => 
+		(X, Y, Z) == (pRhs.X, pRhs.Y, pRhs.Z);
+	
+	public override bool Equals( object? obj) =>
+		obj is Vector rhs && Equals(rhs);
 
-	public static bool operator !=(Vector lhs, Vector rhs) => !(lhs == rhs);
+	public override int GetHashCode() =>
+		HashCode.Combine(X, Y, Z);
 
-#endregion
+	#endregion
 }

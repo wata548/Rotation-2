@@ -1,5 +1,5 @@
 namespace Rotation.Ray;
 
-public class BVH {
-	
+public partial class BVH {
+    private IReadOnlyList<AABBNode> _hirearchy;
 }

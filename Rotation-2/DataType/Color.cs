@@ -11,22 +11,32 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 	public int ByteG => (int)(Math.Clamp(G, 0, 1) * 255);
 	public int ByteB => (int)(Math.Clamp(B, 0, 1) * 255);
 
+	public override int GetHashCode() {
+		return HashCode.Combine(R, G, B);
+	}
+
+	public bool Equals(Color pRhs) {
+		var diff = MathF.Abs(R - pRhs.R) 
+		           + MathF.Abs(G - pRhs.G) 
+		           + MathF.Abs(B - pRhs.B);
+		return diff <= 1e-5;		
+	}
+	
+	public override bool Equals( object? pObj) {
+		return pObj is Color rhs && Equals(rhs);
+	}
+	
 	public Color(string pHex): this(
 		int.Parse(pHex[0..2], NumberStyles.HexNumber) / 255f,
 		int.Parse(pHex[2..4], NumberStyles.HexNumber) / 255f,
 		int.Parse(pHex[4..6], NumberStyles.HexNumber) / 255f
 	){}
-	
-	public static bool operator ==(Color pLhs, Color pRhs) {
-		var diff = MathF.Abs(pLhs.R - pRhs.R) +
-			MathF.Abs(pLhs.G - pRhs.G) +
-			MathF.Abs(pLhs.B - pRhs.B);
-		return diff <= 1e-5;
-	}
 
-	public static bool operator !=(Color pLhs, Color pRhs) {
-		return !(pLhs == pRhs);
-	}
+	public static bool operator ==(Color pLhs, Color pRhs) =>
+		pLhs.Equals(pRhs);
+
+	public static bool operator !=(Color pLhs, Color pRhs) =>
+		!(pLhs == pRhs);
 
 	public static Color operator +(Color pLhs, Color pRhs) {
 		return new(

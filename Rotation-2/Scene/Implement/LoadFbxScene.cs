@@ -1,4 +1,5 @@
 using Rotation.Light;
+using Rotation.Ray;
 
 namespace Rotation.Scene;
 
@@ -8,9 +9,11 @@ public class LoadFbxScene: IScene {
 	private List<SpotLight> _lights = new();
 	public IEnumerable<IDrawable> Objs => _objs;
 	public IEnumerable<ILight> Lights => _lights;
-	public string OtherData { get; }
-	public float _speed = 360; 
-    
+	public string OtherData => "";
+	private readonly float _speed;
+	private const float LightTerm = 8;
+	private readonly Vector Middle;
+	
 	public LoadFbxScene(Setting pSetting) {
 		Console.Write("Enter target file(test.fbx): ");
 		var targetFile = Console.ReadLine(); 
@@ -26,29 +29,37 @@ public class LoadFbxScene: IScene {
 		Console.Clear();
 		Console.Write("NOW!, PLEASE ZOOM OUT QUICKLY!!!");
 		var loader = new FbxLoader();
-		var mesh = loader.Load(targetFile);
+		var mesh = loader.Load(targetFile, true);
 		_objs.Add( new Object {
 			Pos = new(0, -3, -5),
 			Scale = scale * Vector.One,
 			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = mesh
 		});
+		var bvh = new BVH(_objs[0].Mesh!.Vertices, _objs[0].Mesh!.TriangleIndies.ToList());
+		/*_objs.Add( new Object {
+			Pos = new(0, 0, -6),
+			Scale = new(30, 30, 1),
+			Rotation = Quaternion.Euler(0, 0, 0),
+			Mesh = Sample.Sample.Cube()
+		});*/
 		_lights.Add(new() {
-			Color = new Color("f7f499") * 4,
-			Pos = pSetting.CameraPos + Vector.Left * +20,
+			Color = new Color("f7f499") * 7,
+			Pos = pSetting.CameraPos + Vector.Left * +2 * LightTerm,
 			Strength = 50,
 		});
 		_lights.Add(new() {
-			Color = new Color("a4c8f7") * 4,
-			Pos = pSetting.CameraPos + Vector.Left * -20,
+			Color = new Color("a4c8f7") * 7,
+			Pos = pSetting.CameraPos + Vector.Left * -2 * LightTerm,
 			Strength = 50,
 		});
 		_lights.Add(new() {
-			Color = new Color("f2afca") * 4,
-			Pos = pSetting.CameraPos + Vector.Up * 9,
+			Color = new Color("ff82ac") * 7,
+			Pos = pSetting.CameraPos + Vector.Up * LightTerm * float.Sqrt(3),
 			Strength = 50,
 		});
-        
+		Middle = new Vector(0, LightTerm * float.Sqrt(3) / 3, 0) + pSetting.CameraPos;
+
 	}
     
 	public void Update(Setting pSetting) {
@@ -58,10 +69,9 @@ public class LoadFbxScene: IScene {
 	}
 
 	private void Triangle() {
-		var middle = _lights.Aggregate(Vector.Zero, (sum, light) => sum + light.Pos) / 3;
-		var q = Quaternion.Euler(0, 0, 40 * Program.Logic.DeltaTime);
+		var q = Quaternion.Euler(0, 0, 100 * Program.Logic.DeltaTime);
 		foreach (var light in _lights) {
-			light.Pos = q.Rotate(light.Pos - middle);
+			light.Pos = Middle + q.Rotate(light.Pos - Middle);
 		}
 	}
 }

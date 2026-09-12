@@ -26,7 +26,7 @@ public class Object: IDrawable, ITransform {
 		}
 	} = new();
 
-	public Mesh? Mesh {
+	public IMesh? Mesh {
 		get;
 		set {
 			field = value;

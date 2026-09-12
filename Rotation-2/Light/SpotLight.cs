@@ -19,5 +19,5 @@ public class SpotLight: ILight {
 		return Color * (dot * Ease(1 - strength / Strength));
 	}
 
-	private float Ease(float pV) => MathF.Sin(MathF.PI / 2 * pV);
+	private float Ease(float pV) => pV; //MathF.Sin(MathF.PI / 2 * pV);
 }
