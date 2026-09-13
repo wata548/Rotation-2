@@ -20,7 +20,7 @@ public class SpotLight: ILight {
 		strength = MathF.Sqrt(strength);
 		var dot = -pTriangle.Normal.Dot(diff.Normalized);
 		var power = float.Max(dot * Ease(1 - strength / Strength), 0);
-		color = (Color * power).Map(f => Math.Clamp(f, 0, 1));
+		color = Color * power;
 		return true;
 	}
 

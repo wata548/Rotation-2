@@ -42,7 +42,7 @@ public class LoadFbxScene: IScene {
 			Mesh = Sample.Sample.Cube()
 		});*/
 		_lights.Add(new() {
-			Color = new Color("ffffff") * 0.7f,
+			Color = new Color("ffffff") * 3,
 			Pos = pSetting.CameraPos + Vector.Up * 8,
 			Strength = 50
 		});
