@@ -35,13 +35,18 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 					strength  = 1 + _setting.Fog * point.Z;
 					strength = Math.Clamp(strength, 0, 1);
 
-					var obj = pPointInfo[i].Object!;
 					foreach (var light in pScene.Lights) {
 						if (_setting.CastShadow) {
-							var ray = new Ray.Ray(light.Pos, point - light.Pos);
-							var rayResult = obj.Mesh!.BVH.RayCasting(obj.Mesh, obj, ray);
-							if(rayResult.Ratio < 1 - 1e-4)
-								continue;	
+							var skip = false;
+							foreach (var obj in pScene.Objs) {
+								var ray = new Ray.Ray(light.Pos, point - light.Pos);
+								var rayResult = obj.RayCasting(ray);
+								if (rayResult.Ratio < 1 - 1e-4) {
+									skip = true;
+									break;
+								}
+							}
+							if(skip) continue;
 						}
 						
 						if(!light.CalcColor(pPointInfo[i].Triangle!, point, out var lightColor)) continue;

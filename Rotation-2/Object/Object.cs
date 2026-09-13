@@ -1,3 +1,5 @@
+using Rotation.Ray;
+
 namespace Rotation;
 
 public class Object: ITransform {
@@ -85,4 +87,7 @@ public class Object: ITransform {
 			triangle.NormalRecalculate();
 		}
 	}
+
+	public RayResult RayCasting(Ray.Ray pRay) =>
+		Mesh?.BVH.RayCasting(Mesh, this, pRay) ?? new(default, 2);
 }

@@ -31,16 +31,17 @@ public class LoadFbxScene: IScene {
 		var loader = new FbxLoader();
 		var mesh = loader.Load(targetFile);
 		_objs.Add( new Object {
-			Pos = new(0, -6, -5),
+			Pos = new(0, -6, -4),
 			Scale = scale * Vector.One,
 			Mesh = mesh
 		});
-		/*_objs.Add( new Object {
-			Pos = new(0, 0, -6),
+		_objs.Add( new Object {
+			Pos = new(0, 0, -8),
 			Scale = new(30, 30, 1),
 			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = Sample.Sample.Cube()
-		});*/
+		});
+		
 		_lights.Add(new() {
 			Color = new Color("ffff00") * 3,
 			Pos = pSetting.CameraPos + Vector.Up * 8,

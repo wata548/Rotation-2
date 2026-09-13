@@ -21,7 +21,7 @@ public class Render {
 	
 	public void Update(IScene pScene) {
 		Array.Fill(_colors, new(0, 0,0));
-		Array.Fill(_pointInfo, new(null, 0, 0,0,null));
+		Array.Fill(_pointInfo, new(0, 0,0,null));
 		_renderedTriangleCnt = 0;
 		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
@@ -71,7 +71,7 @@ public class Render {
 			var coord = (int)fixedPoint.X + (int)(_setting.ScreenSize.X * fixedPoint.Y);
 			var zInv = 1f / (z + 1e-6f);
 			if (_pointInfo[coord].ZInv > zInv) return;
-			_pointInfo[coord] = new(pObject, zInv, pU, pV, pTriangle);
+			_pointInfo[coord] = new(zInv, pU, pV, pTriangle);
 		}
 	}
 	
