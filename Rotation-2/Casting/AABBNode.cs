@@ -2,7 +2,7 @@ namespace Rotation.Ray;
 
 public partial class BVH {
     private class AABBNode {
-        public const int MaxLeafTriangleCnt = 4;
+        public const int MaxLeafTriangleCnt = 3;
         public int TriangleCnt { get; set; }
         public int TriangleIdx { get; set; }
         public int LeftIdx { get; set; }

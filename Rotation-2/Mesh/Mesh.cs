@@ -4,6 +4,7 @@ namespace Rotation;
 
 
 public interface IMesh {
+    BVH BVH { get; }
     IReadOnlyList<Vector> Vertices { get; }
     IReadOnlyList<TriangleIdx> TriangleIndies { get; }
 }

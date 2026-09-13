@@ -1,6 +1,6 @@
 namespace Rotation.Ray;
 
-public struct AABB {
+public class AABB {
 	public Vector Min { get; private set; }
 	public Vector Max { get; private set; }
 

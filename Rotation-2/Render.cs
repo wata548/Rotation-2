@@ -21,7 +21,7 @@ public partial class Render {
 	
 	public void Update(IScene pScene) {
 		Array.Fill(_colors, new(0, 0,0));
-		Array.Fill(_pointInfo, new(0, 0,0,null));
+		Array.Fill(_pointInfo, new(null, 0, 0,0,null));
 		_renderedTriangleCnt = 0;
 		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
@@ -38,12 +38,12 @@ public partial class Render {
 				var uTerm = 1f / (triangle.U.Distance * _setting.CoordDetail);
 				var vTerm = 1f / (triangle.V.Distance * _setting.CoordDetail);
 				
-				Fill(triangle, 0, 1);
-				Fill(triangle, 1, 0);
+				Fill(obj, triangle, 0, 1);
+				Fill(obj, triangle, 1, 0);
 				for (float i = 0; i < 1; i += uTerm) {
 					for (float j = 0; j < 1; j += vTerm) {
 						if (i + j > 1) break;
-						Fill(triangle, i,j);
+						Fill(obj, triangle, i,j);
 					}
 				}	
 			}
@@ -55,7 +55,7 @@ public partial class Render {
 			return pPos * ratio;	
 		}
 
-		void Fill(Triangle pTriangle, float pU, float pV) {
+		void Fill(Object pObject, Triangle pTriangle, float pU, float pV) {
 			var point = pTriangle.GetPoint(pU, pV);
 			var fixedPoint = point; 
 			fixedPoint.Y *= -1;
@@ -71,7 +71,7 @@ public partial class Render {
 			var coord = (int)fixedPoint.X + (int)(_setting.ScreenSize.X * fixedPoint.Y);
 			var zInv = 1f / (z + 1e-6f);
 			if (_pointInfo[coord].ZInv > zInv) return;
-			_pointInfo[coord] = new(zInv, pU, pV, pTriangle);
+			_pointInfo[coord] = new(pObject, zInv, pU, pV, pTriangle);
 		}
 	}
 	
@@ -98,9 +98,17 @@ public partial class Render {
 					var point = _pointInfo[i].Triangle!.GetPoint(_pointInfo[i].U, _pointInfo[i].V);
 					strength  = 1 + _setting.Fog * point.Z;
 					strength = Math.Clamp(strength, 0, 1);
-					
+
+					var obj = _pointInfo[i].Object!;
 					foreach (var light in pScene.Lights) {
-						var lightColor = light.CalcColor(_pointInfo[i].Triangle!, point);
+						if (_setting.CastShadow) {
+							var ray = new Ray.Ray(light.Pos, point - light.Pos);
+							var rayResult = obj.Mesh!.BVH.RayCasting(obj.Mesh, obj, ray);
+							if(rayResult.Ratio < 1 - 1e-4)
+								continue;	
+						}
+						
+						if(!light.CalcColor(_pointInfo[i].Triangle!, point, out var lightColor)) continue;
 						color = _setting.LightProcessType switch {
 							LightProcessType.Screen => color.Screen(lightColor),
 							LightProcessType.Overlay => color.Overlay(lightColor),

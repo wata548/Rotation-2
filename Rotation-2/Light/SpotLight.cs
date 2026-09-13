@@ -10,13 +10,18 @@ public class SpotLight: ILight {
 	private float SqStrength => Strength * Strength;
 
 
-	public Color CalcColor(Triangle pTriangle, Vector pPos) {
+	public bool CalcColor(Triangle pTriangle, Vector pPos, out Color color) {
 		var diff = pPos - Pos;
 		var strength = diff.SqDistance;
-		if (strength > SqStrength) return new Color(0,0,0);
+		if (strength > SqStrength) {
+			color = default;
+			return false;
+		}
 		strength = MathF.Sqrt(strength);
 		var dot = -pTriangle.Normal.Dot(diff.Normalized);
-		return Color * (dot * Ease(1 - strength / Strength));
+		var power = float.Max(dot * Ease(1 - strength / Strength), 0);
+		color = Color * power;
+		return true;
 	}
 
 	private float Ease(float pV) => pV; //MathF.Sin(MathF.PI / 2 * pV);

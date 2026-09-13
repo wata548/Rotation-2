@@ -12,6 +12,7 @@ public record Setting(
 	bool FillContext = false,
 	bool UseColor = true,
 	bool ZBufferShading = false,
+	bool CastShadow = false,
 	LightProcessType LightProcessType = LightProcessType.Screen
 ) {
 	public readonly Vector ScreenSize = ScreenRange * CoordDetail;

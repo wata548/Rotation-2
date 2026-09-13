@@ -8,6 +8,8 @@ public class Program {
         if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
         Console.Write("Detail? (30): ");
         if(!int.TryParse(Console.ReadLine()??"", out var detail)) detail = 30; 
+        Console.Write("CastShadow? (y / N): ");
+        var castShadow = (Console.ReadLine()??"").Contains('y');
         Console.Write("Ascii? (y / N): ");
         var ascii = (Console.ReadLine()??"").Contains('y');
         Console.Write("Isolate? (y / N): ");
@@ -21,7 +23,7 @@ public class Program {
         var setting = new Setting(
 	        new(13, 13),
 	        Vector.Zero,
-	        new("cccccc"),
+	        new("aaaaaa"),
             frame,
             detail, 
             Fog: 0.1f,
@@ -30,7 +32,8 @@ public class Program {
             UseColor: !ascii,
             FillContext: true,
             ZBufferShading: false,
-	        LightProcessType: LightProcessType.SoftLight
+	        LightProcessType: LightProcessType.SoftLight,
+			CastShadow: castShadow   
         );
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");

@@ -7,7 +7,7 @@ public class LoadFbxScene: IScene {
 
 	private List<Object> _objs = new();
 	private List<SpotLight> _lights = new();
-	public IEnumerable<IDrawable> Objs => _objs;
+	public IEnumerable<Object> Objs => _objs;
 	public IEnumerable<ILight> Lights => _lights;
 	public string OtherData => "";
 	private readonly float _speed;
@@ -31,12 +31,11 @@ public class LoadFbxScene: IScene {
 		var loader = new FbxLoader();
 		var mesh = loader.Load(targetFile);
 		_objs.Add( new Object {
-			Pos = new(0, -3, -5),
+			Pos = new(0, -6, -5),
 			Scale = scale * Vector.One,
-			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = mesh
 		});
-		var temp = (mesh as Mesh)!.BVH;
+		_ = mesh.BVH;
 		/*_objs.Add( new Object {
 			Pos = new(0, 0, -6),
 			Scale = new(30, 30, 1),
@@ -44,11 +43,12 @@ public class LoadFbxScene: IScene {
 			Mesh = Sample.Sample.Cube()
 		});*/
 		_lights.Add(new() {
-			Color = new Color("f7f499") * 7,
-			Pos = pSetting.CameraPos + Vector.Left * +2 * LightTerm,
-			Strength = 50,
+			Color = new Color("ff6060") * 7,
+			//Pos = pSetting.CameraPos + Vector.Left * 2 * LightTerm,
+			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Strength = 50
 		});
-		_lights.Add(new() {
+		/*_lights.Add(new() {
 			Color = new Color("a4c8f7") * 7,
 			Pos = pSetting.CameraPos + Vector.Left * -2 * LightTerm,
 			Strength = 50,
@@ -57,7 +57,7 @@ public class LoadFbxScene: IScene {
 			Color = new Color("ff82ac") * 7,
 			Pos = pSetting.CameraPos + Vector.Up * LightTerm * float.Sqrt(3),
 			Strength = 50,
-		});
+		});*/
 		Middle = new Vector(0, LightTerm * float.Sqrt(3) / 3, 0) + pSetting.CameraPos;
 
 	}
@@ -65,7 +65,7 @@ public class LoadFbxScene: IScene {
 	public void Update(Setting pSetting) {
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
-		Triangle();
+		//Triangle();
 	}
 
 	private void Triangle() {

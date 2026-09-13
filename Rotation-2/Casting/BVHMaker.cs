@@ -76,8 +76,9 @@ public partial class BVH {
                 bigger.AABB.Expand(pVertices, pTriangleIndies[end]);
                 bigger.TriangleCnt++;
             }
-            
-            
+
+            smaller.TriangleIdx = node.TriangleIdx;
+            bigger.TriangleIdx = node.TriangleIdx + smaller.TriangleCnt;
             aabbs.Add(smaller);
             if (!aabbs[^1].IsLeaf)
                 stack.Push(aabbs.Count - 1);

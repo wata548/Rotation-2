@@ -1,6 +1,6 @@
 namespace Rotation;
 
-public class Triangle: IDrawable {
+public class Triangle {
 	public Triangle(params Wrapper<Vector>[] pVertices) {
 		if (pVertices.Length < 3) throw new ArgumentOutOfRangeException("pVertices count must over 3");
 		A = pVertices[0];
@@ -22,11 +22,6 @@ public class Triangle: IDrawable {
 	
 	public Vector GetPoint(float pU, float pV) =>
 		(1 - pU - pV) * A.V + pU * B.V + pV * C.V;
-
-	public IEnumerable<Triangle> GetTriangles() => [this];
-
-	public IEnumerable<Triangle> Triangles => [this];
-
 
 	/*
 	public void RotateX(float pDelta) {

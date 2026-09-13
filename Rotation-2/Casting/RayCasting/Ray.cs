@@ -1,6 +1,8 @@
 namespace Rotation.Ray;
 
 public record Ray(Vector Pos, Vector Direction) {
+	public Vector Destination => Pos + Direction;
+	
     public Ray ApplyTransform(ITransform pTransform) {
         var end = pTransform.CancelTransform(Pos + Direction);
         var start = pTransform.CancelTransform(Pos);
@@ -13,7 +15,7 @@ public record Ray(Vector Pos, Vector Direction) {
 	    var c = pVertices[pIdx.C];
 	    var up = (b - a).Cross(c - a);
 	    var denominator = up.Dot(Direction);
-	    if (denominator <= 1e-5) {
+	    if (MathF.Abs(denominator) <= 1e-5) {
 		    t = 2;
 		    return false;
 	    }
@@ -80,7 +82,7 @@ public record Ray(Vector Pos, Vector Direction) {
 		    minT = float.Max(minT, minZ);
 		    maxT = float.Min(maxT, maxZ);
 	    }
-	    return minT <= maxT && minT >= pMin;
+	    return minT <= maxT && minT <= pMin;
     }
     	
 }

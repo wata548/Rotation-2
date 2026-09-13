@@ -1,6 +1,6 @@
 namespace Rotation;
 
-public class Object: IDrawable, ITransform {
+public class Object: ITransform {
 	//==================================================Properties	
 	public Vector Pos {
 		get;
