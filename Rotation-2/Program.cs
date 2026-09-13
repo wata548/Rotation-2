@@ -29,8 +29,7 @@ public class Program {
             Fog: 0.1f,
             FOV: 109,
             Isolate: isolate,
-            UseColor: !ascii,
-            FillContext: true,
+            Ascii: ascii,
             ZBufferShading: false,
 	        LightProcessType: LightProcessType.SoftLight,
 			CastShadow: castShadow   

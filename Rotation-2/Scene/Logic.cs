@@ -17,8 +17,11 @@ public class Logic {
 		Setting = pSetting;
 		Scene = pScene;
 		_streamWriter = new StreamWriter(new BufferedStream(Console.OpenStandardOutput()));
-		_render = new(pSetting);
 		_stopWatch = new();
+		_render = pSetting switch {
+			{ Ascii: true } => new(pSetting, new AsciiRenderer(pSetting)),
+			{ Ascii: false } => new(pSetting, new PixelRenderer(pSetting)),
+		};
 	}
 
 	public Task StartRenderLoop() =>
@@ -32,10 +35,10 @@ public class Logic {
 			await _streamWriter.WriteAsync(context);
 			await _streamWriter.WriteLineAsync(
 				$"""
-				 {Scene.OtherData}
-				 Frame: {1f / DeltaTime :F}
-				 DeltaTime: {DeltaTime}
-				 PlayTime: {Playtime}
+				 {Scene.OtherData}                 
+				 Frame: {1f / DeltaTime :F}            
+				 DeltaTime: {DeltaTime}           
+				 PlayTime: {Playtime}           
 				 """);
 			await _streamWriter.FlushAsync(pToken);	
 		}
@@ -56,7 +59,7 @@ public class Logic {
 			else used += remain;
 			
 			Playtime += DeltaTime;
-			DeltaTime = used / 1000f;
+			DeltaTime = (used + remain) / 1000f;
 			Thread.Sleep(remain);
 		}
 		return;

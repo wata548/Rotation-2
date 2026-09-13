@@ -9,8 +9,7 @@ public record Setting(
 	float FOV = 95,
 	float Fog = 0.05f,
 	bool Isolate = false,
-	bool FillContext = false,
-	bool UseColor = true,
+	bool Ascii = false,
 	bool ZBufferShading = false,
 	bool CastShadow = false,
 	LightProcessType LightProcessType = LightProcessType.Screen
