@@ -116,6 +116,7 @@ public partial class Render {
 							LightProcessType.HardLight => color.HardLight(lightColor),
 							_ => color
 						};
+						color = color.Map(f => Math.Clamp(f, 0, 1));
 					}
 					value = color * strength;
 				}

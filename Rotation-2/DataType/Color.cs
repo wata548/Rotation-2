@@ -96,9 +96,9 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 		);
 	}
 
-	private Color Map(Func<float, float> pFunc) => new(pFunc(R), pFunc(G), pFunc(B));
+	public Color Map(Func<float, float> pFunc) => new(pFunc(R), pFunc(G), pFunc(B));
 
-	private Color Map(Func<float, float, float> pFunc, Color pRhs) => new(
+	public Color Map(Func<float, float, float> pFunc, Color pRhs) => new(
 		pFunc(R, pRhs.R),
 		pFunc(G, pRhs.G),
 		pFunc(B, pRhs.B)

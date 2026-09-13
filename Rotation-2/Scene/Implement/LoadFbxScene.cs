@@ -35,7 +35,6 @@ public class LoadFbxScene: IScene {
 			Scale = scale * Vector.One,
 			Mesh = mesh
 		});
-		_ = mesh.BVH;
 		/*_objs.Add( new Object {
 			Pos = new(0, 0, -6),
 			Scale = new(30, 30, 1),
@@ -43,21 +42,10 @@ public class LoadFbxScene: IScene {
 			Mesh = Sample.Sample.Cube()
 		});*/
 		_lights.Add(new() {
-			Color = new Color("ff6060") * 7,
-			//Pos = pSetting.CameraPos + Vector.Left * 2 * LightTerm,
+			Color = new Color("ffffff") * 0.7f,
 			Pos = pSetting.CameraPos + Vector.Up * 8,
 			Strength = 50
 		});
-		/*_lights.Add(new() {
-			Color = new Color("a4c8f7") * 7,
-			Pos = pSetting.CameraPos + Vector.Left * -2 * LightTerm,
-			Strength = 50,
-		});
-		_lights.Add(new() {
-			Color = new Color("ff82ac") * 7,
-			Pos = pSetting.CameraPos + Vector.Up * LightTerm * float.Sqrt(3),
-			Strength = 50,
-		});*/
 		Middle = new Vector(0, LightTerm * float.Sqrt(3) / 3, 0) + pSetting.CameraPos;
 
 	}
@@ -65,13 +53,5 @@ public class LoadFbxScene: IScene {
 	public void Update(Setting pSetting) {
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
-		//Triangle();
-	}
-
-	private void Triangle() {
-		var q = Quaternion.Euler(0, 0, 100 * Program.Logic.DeltaTime);
-		foreach (var light in _lights) {
-			light.Pos = Middle + q.Rotate(light.Pos - Middle);
-		}
 	}
 }
