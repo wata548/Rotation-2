@@ -65,10 +65,13 @@ public class Object: ITransform {
 					break;
 			}
 		}
-		_triangles = Mesh.TriangleIndies.Select(idxs => new Triangle(
-			_vertices[idxs.A],
-			_vertices[idxs.B],
-			_vertices[idxs.C])
+		_triangles = Mesh.TriangleIndies.Select((idxs, idx) => new Triangle(
+			idx, 
+			[
+				_vertices[idxs.A],
+				_vertices[idxs.B],
+				_vertices[idxs.C]
+			])
 		).ToList();
 		
 	}

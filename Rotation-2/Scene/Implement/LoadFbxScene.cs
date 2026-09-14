@@ -11,8 +11,9 @@ public class LoadFbxScene: IScene {
 	public IEnumerable<ILight> Lights => _lights;
 	public string OtherData => "";
 	private readonly float _speed;
-	private const float LightTerm = 8;
-	private readonly Vector Middle;
+	private readonly Vector Pos;
+	private const float MoveSpeed = 1;
+	private const float MoveTerm = 2;
 	
 	public LoadFbxScene(Setting pSetting) {
 		Console.Write("Enter target file(test.fbx): ");
@@ -29,11 +30,12 @@ public class LoadFbxScene: IScene {
 		Console.Clear();
 		Console.Write("NOW!, PLEASE ZOOM OUT QUICKLY!!!");
 		var loader = new FbxLoader();
-		var mesh = loader.Load(targetFile);
+		var mesh = loader.Load(targetFile, true);
 		_objs.Add( new Object {
 			Pos = new(0, -6, -4),
 			Scale = scale * Vector.One,
-			Mesh = mesh
+			Mesh = mesh,
+			Rotation = Quaternion.Euler(0, 0, 0)
 		});
 		_objs.Add( new Object {
 			Pos = new(0, 0, -8),
@@ -41,18 +43,18 @@ public class LoadFbxScene: IScene {
 			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = Sample.Sample.Cube()
 		});
-		
+		Pos = _objs[0].Pos;
 		_lights.Add(new() {
-			Color = new Color("ffff00") * 3,
+			Color = new Color("ffffff") * 3,
 			Pos = pSetting.CameraPos + Vector.Up * 8,
 			Strength = 50
 		});
-		Middle = new Vector(0, LightTerm * float.Sqrt(3) / 3, 0) + pSetting.CameraPos;
-
+		
 	}
     
 	public void Update(Setting pSetting) {
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
+		_objs[0].Pos = Pos + Vector.Up * (MathF.Sin(MoveSpeed * Single.Pi * Program.Logic.Playtime) * 0.5f * MoveTerm);
 	}
 }

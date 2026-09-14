@@ -1,5 +1,5 @@
 namespace Rotation;
 
 public record PointInfo (
-	float ZInv, float U, float V, Triangle? Triangle
+	Object? pObject, float ZInv, float U, float V, Triangle? Triangle
 ){}

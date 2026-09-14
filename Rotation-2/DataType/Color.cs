@@ -7,9 +7,9 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 	public float G { get; set; } = pG;
 	public float B { get; set; } = pB;
 
-	public int ByteR => (int)(Math.Clamp(R, 0, 1) * 255);
-	public int ByteG => (int)(Math.Clamp(G, 0, 1) * 255);
-	public int ByteB => (int)(Math.Clamp(B, 0, 1) * 255);
+	public byte ByteR => (byte)(Math.Clamp(R, 0, 1) * 255);
+	public byte ByteG => (byte)(Math.Clamp(G, 0, 1) * 255);
+	public byte ByteB => (byte)(Math.Clamp(B, 0, 1) * 255);
 
 	public override int GetHashCode() {
 		return HashCode.Combine(R, G, B);

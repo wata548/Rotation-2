@@ -21,7 +21,7 @@ public class Render {
 	
 	public void Update(IScene pScene) {
 		Array.Fill(_colors, new(0, 0,0));
-		Array.Fill(_pointInfo, new(0, 0,0,null));
+		Array.Fill(_pointInfo, new(null, 0, 0,0,null));
 		_renderedTriangleCnt = 0;
 		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
@@ -55,7 +55,7 @@ public class Render {
 			return pPos * ratio;	
 		}
 
-		void Fill(Object pObject, Triangle pTriangle, float pU, float pV) {
+		void Fill(Object pObj,Triangle pTriangle, float pU, float pV) {
 			var point = pTriangle.GetPoint(pU, pV);
 			var fixedPoint = point; 
 			fixedPoint.Y *= -1;
@@ -71,7 +71,7 @@ public class Render {
 			var coord = (int)fixedPoint.X + (int)(_setting.ScreenSize.X * fixedPoint.Y);
 			var zInv = 1f / (z + 1e-6f);
 			if (_pointInfo[coord].ZInv > zInv) return;
-			_pointInfo[coord] = new(zInv, pU, pV, pTriangle);
+			_pointInfo[coord] = new(pObj, zInv, pU, pV, pTriangle);
 		}
 	}
 	

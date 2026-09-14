@@ -14,8 +14,8 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 		return "  ";
 	}
 	
-    public StringBuilder GetResultBuilder(IScene pScene, PointInfo[] pPointInfo, Color[] pColors) {
-	    var result = new StringBuilder();
+	public StringBuilder GetResultBuilder(IScene pScene, PointInfo[] pPointInfo, Color[] pColors) {
+		var result = new StringBuilder();
 		Color prev = new(0,0,0);
 		var curPixel = "  ";
 		result.Append("|");
@@ -30,8 +30,18 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 			var strength = 0f;
 			if (pPointInfo[i].ZInv > 0) {
 				if (!_setting.ZBufferShading && pPointInfo[i].Triangle != null) {
+					var pointInfo = pPointInfo[i];
 					var color = _setting.DefaultColor;
-					var point = pPointInfo[i].Triangle!.GetPoint(pPointInfo[i].U, pPointInfo[i].V);
+					var texture = pointInfo.pObject!.Mesh!.Texture;
+					if (texture != null) {
+						color = texture.GetPixel(
+							pointInfo.pObject!.Mesh!.TriangleIndies[pointInfo.Triangle!.Idx], 
+							pointInfo.U,
+							pointInfo.V
+						);
+					}
+						
+					var point = pointInfo.Triangle!.GetPoint(pointInfo.U, pointInfo.V);
 					strength  = 1 + _setting.Fog * point.Z;
 					strength = Math.Clamp(strength, 0, 1);
 
@@ -49,7 +59,7 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 							if(skip) continue;
 						}
 						
-						if(!light.CalcColor(pPointInfo[i].Triangle!, point, out var lightColor)) continue;
+						if(!light.CalcColor(pointInfo.Triangle!, point, out var lightColor)) continue;
 						color = _setting.LightProcessType switch {
 							LightProcessType.Screen => color.Screen(lightColor),
 							LightProcessType.Overlay => color.Overlay(lightColor),
@@ -75,5 +85,5 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 		}
 		result.Append("\n\x1b[38;2;255;255;255m");
 		return result;
-    }
+	}
 }

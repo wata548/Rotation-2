@@ -1,14 +1,16 @@
 namespace Rotation;
 
 public class Triangle {
-	public Triangle(params Wrapper<Vector>[] pVertices) {
+	public Triangle(int pIdx, Wrapper<Vector>[] pVertices) {
 		if (pVertices.Length < 3) throw new ArgumentOutOfRangeException("pVertices count must over 3");
+		Idx = pIdx;
 		A = pVertices[0];
 		B = pVertices[1];
 		C = pVertices[2];
 		NormalRecalculate();
 	}
-	
+
+	public readonly int Idx;
 	public Wrapper<Vector> A { get; set; }
 	public Wrapper<Vector> B { get; set; }
 	public Wrapper<Vector> C { get; set; }
