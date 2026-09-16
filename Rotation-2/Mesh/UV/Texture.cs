@@ -5,6 +5,7 @@ namespace Rotation.UV;
 
 public interface ITexture {
 	public Color GetPixel(TriangleIdx pIdx, float pU, float pV);
+	public void SwapIndex(int pLhs, int pRhs);
 }
 
 public class Texture: ITexture {
@@ -64,7 +65,11 @@ public class Texture: ITexture {
 		var y = (int)MathF.Round((_height - 1) * (1 - coord.Y));
 		return _map[x + _width * y];
 	}
-	
+
+	public void SwapIndex(int pLhs, int pRhs) {
+		(_map[pLhs], _map[pRhs]) = (_map[pRhs], _map[pLhs]);
+	}
+
 	public void Save(string pName) {
 		using Bitmap bitmap = new(_width, _height);
 		

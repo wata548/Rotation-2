@@ -35,7 +35,7 @@ public class LoadFbxScene: IScene {
 			Pos = new(0, -6, -4),
 			Scale = scale * Vector.One,
 			Mesh = mesh,
-			Rotation = Quaternion.Euler(0, 0, 0)
+			Rotation = Quaternion.Euler(0, 180, 0)
 		});
 		_objs.Add( new Object {
 			Pos = new(0, 0, -8),

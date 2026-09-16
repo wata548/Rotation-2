@@ -50,6 +50,9 @@ public class Logic {
 			if (pToken.IsCancellationRequested) break;
 			_stopWatch.Restart();
 			Scene.Update(Setting);
+			foreach (var obj in Scene.Objs)
+				obj.Update();
+			
 			_render.Update(Scene);
 			await _render.SaveResult(Scene);
 

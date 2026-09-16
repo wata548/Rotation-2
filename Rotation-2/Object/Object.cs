@@ -65,6 +65,10 @@ public class Object: ITransform {
 					break;
 			}
 		}
+		MeshUpdate();
+	}
+	private void MeshUpdate() {
+		if (Mesh == null) return;
 		_triangles = Mesh.TriangleIndies.Select((idxs, idx) => new Triangle(
 			idx, 
 			[
@@ -73,7 +77,6 @@ public class Object: ITransform {
 				_vertices[idxs.C]
 			])
 		).ToList();
-		
 	}
 	
 	private void VertexPositionUpdate() {
@@ -93,4 +96,9 @@ public class Object: ITransform {
 
 	public RayResult RayCasting(Ray.Ray pRay) =>
 		Mesh?.BVH.RayCasting(Mesh, this, pRay) ?? new(default, 2);
+
+	public void Update() {
+		if(Mesh?.NeedUpdate() ?? false) 
+			MeshUpdate();
+	}
 }
