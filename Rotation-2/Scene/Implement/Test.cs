@@ -4,10 +4,10 @@ using Rotation.UV;
 
 namespace Rotation.Scene;
 
-public class LoadFbxScene: IScene {
+public class Test: IScene {
 
 	private List<Object> _objs = new();
-	private List<ILight> _lights = new();
+	private List<SpotLight> _lights = new();
 	public IEnumerable<Object> Objs => _objs;
 	public IEnumerable<ILight> Lights => _lights;
 	public string OtherData => "";
@@ -16,7 +16,7 @@ public class LoadFbxScene: IScene {
 	private const float MoveSpeed = 1;
 	private const float MoveTerm = 2;
 	
-	public LoadFbxScene(Setting pSetting) {
+	public Test(Setting pSetting) {
 		Console.Write("Enter target file(test.fbx): ");
 		var targetFile = Console.ReadLine(); 
 		targetFile = string.IsNullOrWhiteSpace(targetFile) ? "Models/test.fbx" : "Models/"+targetFile;
@@ -40,17 +40,30 @@ public class LoadFbxScene: IScene {
 			Rotation = Quaternion.Euler(0, 0, 0)
 		});
 		_objs.Add( new Object {
+			Pos = new(4, -8, -4),
+			Scale = scale * Vector.One,
+			Mesh = mesh,
+			Rotation = Quaternion.Euler(0, 0, 0)
+		});
+		_objs.Add( new Object {
+			Pos = new(-4, -8, -4),
+			Scale = scale * Vector.One,
+			Mesh = mesh,
+			Rotation = Quaternion.Euler(0, 0, 0)
+		});
+		_objs.Add( new Object {
 			Pos = new(0, 0, -8),
 			Scale = new(30, 30, 1),
 			Rotation = Quaternion.Euler(0, 0, 0),
 			Mesh = Sample.Sample.Cube()
 		});
 		Pos = _objs[0].Pos;
-		_lights.Add(new CelSpotLight {
+		_lights.Add(new() {
 			Color = new Color("ffffff") * 3,
 			Pos = pSetting.CameraPos + Vector.Up * 8,
 			Strength = 50
 		});
+		
 	}
     
 	public void Update(Setting pSetting) {

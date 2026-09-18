@@ -4,16 +4,21 @@ using Rotation.UV;
 namespace Rotation;
 
 public interface IMesh {
-    ITexture? Texture { get; }
+    UVMap? UV { get; }
+    Texture? Normal { get; }
+    Texture? Texture { get; }
     BVH BVH { get; }
     IReadOnlyList<Vector> Vertices { get; }
     IReadOnlyList<TriangleIdx> TriangleIndies { get; }
     bool NeedUpdate();
 }
 
-public class Mesh(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies, ITexture? pTexture = null): IMesh {
+public class Mesh(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies, UVMap? pUV = null, Texture? pTexture = null, Texture? pNormal = null): IMesh {
+    
     private bool _needUpdate = false;
-    public ITexture? Texture { get; } = pTexture;
+    public UVMap? UV { get; } = pUV;
+    public Texture? Texture { get; } = pTexture;
+    public Texture? Normal { get; } = pNormal;
     public IReadOnlyList<Vector> Vertices { get; } = pVertices;
     public IReadOnlyList<TriangleIdx> TriangleIndies => _triangleIdxes;
     private readonly List<TriangleIdx> _triangleIdxes = pTriangleIndies;

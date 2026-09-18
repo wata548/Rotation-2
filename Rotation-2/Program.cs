@@ -1,9 +1,11 @@
-﻿namespace Rotation;
+﻿
+namespace Rotation;
 
 public class Program {
     public static Logic Logic;
 	
     public static void Main() {
+	    
         Console.Write("Frame? (60): ");
         if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
         Console.Write("Detail? (30): ");

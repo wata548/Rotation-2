@@ -5,7 +5,7 @@ namespace Rotation.Ray;
 public partial class BVH {
     private enum Axis{X,Y,Z}
     
-    public BVH(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies, ITexture? pTexture) {
+    public BVH(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies, Texture? pTexture) {
         var centers = pTriangleIndies.Select(Center)
             .ToList();
         
@@ -63,7 +63,6 @@ public partial class BVH {
                     (pTriangleIndies[start], pTriangleIndies[end]) =
                                             (pTriangleIndies[end], pTriangleIndies[start]);
                     (centers[start], centers[end]) = (centers[end], centers[start]);
-                    pTexture?.SwapIndex(start, end);
                     smaller.AABB.Expand(pVertices, pTriangleIndies[start]);
                     smaller.TriangleCnt++;
                     start++;

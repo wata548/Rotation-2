@@ -35,6 +35,7 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 					var texture = pointInfo.pObject!.Mesh!.Texture;
 					if (texture != null) {
 						color = texture.GetPixel(
+							pointInfo.pObject!.Mesh!.UV,
 							pointInfo.pObject!.Mesh!.TriangleIndies[pointInfo.Triangle!.Idx], 
 							pointInfo.U,
 							pointInfo.V
@@ -59,7 +60,7 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 							if(skip) continue;
 						}
 						
-						if(!light.CalcColor(pointInfo.Triangle!, point, out var lightColor)) continue;
+						if(!light.CalcColor(pointInfo.Triangle!.Normal, point, out var lightColor)) continue;
 						color = _setting.LightProcessType switch {
 							LightProcessType.Screen => color.Screen(lightColor),
 							LightProcessType.Overlay => color.Overlay(lightColor),
@@ -80,7 +81,6 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 				prev = value;
 				curPixel = GetPixel(result, value, _brightnessString.Length * strength);
 			}
-    
 			result.Append(curPixel);
 		}
 		result.Append("\n\x1b[38;2;255;255;255m");

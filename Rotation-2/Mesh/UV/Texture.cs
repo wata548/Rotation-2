@@ -1,34 +1,13 @@
 using System.Drawing;
 using System.Drawing.Imaging;
-
 namespace Rotation.UV;
 
-public interface ITexture {
-	public Color GetPixel(TriangleIdx pIdx, float pU, float pV);
-	public void SwapIndex(int pLhs, int pRhs);
-}
+public class Texture{
+	protected readonly int _width;
+	protected readonly int _height;
+	protected readonly Color[] _map;
 
-public class Texture: ITexture {
-	private readonly int _width;
-	private readonly int _height;
-	private readonly Color[] _map;
-	private readonly List<UVCoord> _coords;
-
-	public record struct UVCoord(float X, float Y) {
-		public static UVCoord operator +(UVCoord pLhs, UVCoord pRhs) =>
-			new(pLhs.X + pRhs.X, pLhs.Y + pRhs.Y);
-		public static UVCoord operator -(UVCoord pLhs, UVCoord pRhs) =>
-			new(pLhs.X - pRhs.X, pLhs.Y - pRhs.Y);
-		public static UVCoord operator *(float pLhs, UVCoord pRhs) =>
-			new(pLhs * pRhs.X, pLhs * pRhs.Y);
-	}
-
-	public void AddCoords(IEnumerable<UVCoord> pCoords) {
-		_coords.AddRange(pCoords);
-	}
-	
-	public Texture(List<UVCoord> pCoords, byte[] pBytes, int pTargetWidth) {
-		_coords = pCoords;
+	public Texture(byte[] pBytes, int pTargetWidth) {
 		using (var image = Image.FromStream(new MemoryStream(pBytes))) {
 			using (var bitmap = (Bitmap)image) {
 				var data = bitmap.LockBits(new(0, 0, image.Width, image.Height),
@@ -55,21 +34,13 @@ public class Texture: ITexture {
 			}
 		}
 	}
-	
-	public Color GetPixel(TriangleIdx pIdx, float pU, float pV) {
-		var a = _coords[pIdx.A];
-		var b = _coords[pIdx.B];
-		var c = _coords[pIdx.C];
-		var coord = a + pU * (b - a) + pV * (c - a);
+
+	public Color GetPixel(UVMap pUV, TriangleIdx pIdx, float pU, float pV) {
+		var coord = pUV.Get(pIdx, pU, pV);
 		var x = (int)MathF.Round((_width - 1) * coord.X);
 		var y = (int)MathF.Round((_height - 1) * (1 - coord.Y));
 		return _map[x + _width * y];
 	}
-
-	public void SwapIndex(int pLhs, int pRhs) {
-		(_map[pLhs], _map[pRhs]) = (_map[pRhs], _map[pLhs]);
-	}
-
 	public void Save(string pName) {
 		using Bitmap bitmap = new(_width, _height);
 		
@@ -99,4 +70,4 @@ public class Texture: ITexture {
 		bitmap.UnlockBits(data);
 		bitmap.Save($"{pName}.png");
 	}
-}
+	}

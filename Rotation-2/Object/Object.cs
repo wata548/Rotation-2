@@ -52,6 +52,8 @@ public class Object: ITransform {
 	
 	
 	//==================================================Methods
+	public Vector GetVertex(int pIdx) => _vertices[pIdx].V; 
+	
 	private void OnChangeMesh() {
 		if (Mesh == null) return;
 		var comp = -1;
@@ -69,6 +71,7 @@ public class Object: ITransform {
 	}
 	private void MeshUpdate() {
 		if (Mesh == null) return;
+		Mesh.UV?.SetDets(Mesh.TriangleIndies);	
 		_triangles = Mesh.TriangleIndies.Select((idxs, idx) => new Triangle(
 			idx, 
 			[

@@ -30,41 +30,52 @@ public class Logic {
 		Task.Run(() => DataLoop(_cancelDataLoop.Token), _cancelDataLoop.Token);
 	
 	private async Task RenderLoop(CancellationToken pToken) {
-		await foreach (var context in _render.Outputs.Reader.ReadAllAsync(pToken)) {
-			Console.SetCursorPosition(0,0);
-			await _streamWriter.WriteAsync(context);
-			await _streamWriter.WriteLineAsync(
-				$"""
-				 {Scene.OtherData}                 
-				 Frame: {1f / DeltaTime :F}            
-				 DeltaTime: {DeltaTime}           
-				 PlayTime: {Playtime}           
-				 """);
-			await _streamWriter.FlushAsync(pToken);	
+		try {
+			await foreach (var context in _render.Outputs.Reader.ReadAllAsync(pToken)) {
+				Console.SetCursorPosition(0, 0);
+				await _streamWriter.WriteAsync(context);
+				await _streamWriter.WriteLineAsync(
+					$"""
+					 {Scene.OtherData}                 
+					 Frame: {1f / DeltaTime:F}            
+					 DeltaTime: {DeltaTime}           
+					 PlayTime: {Playtime}           
+					 """);
+				await _streamWriter.FlushAsync(pToken);
+			}
+		}
+		catch(Exception pError) {
+			Console.WriteLine(pError);
 		}
 	}
 
 	private async Task DataLoop(CancellationToken pToken) {
-		var term = (int)MathF.Ceiling(1000f / Setting.Frame);
-		while (true) {
-			if (pToken.IsCancellationRequested) break;
-			_stopWatch.Restart();
-			Scene.Update(Setting);
-			foreach (var obj in Scene.Objs)
-				obj.Update();
-			
-			_render.Update(Scene);
-			await _render.SaveResult(Scene);
+		try {
+			var term = (int)MathF.Ceiling(1000f / Setting.Frame);
+			while (true) {
+				if (pToken.IsCancellationRequested) break;
+				_stopWatch.Restart();
+				Scene.Update(Setting);
+				foreach (var obj in Scene.Objs)
+					obj.Update();
 
-			var used = (int)_stopWatch.ElapsedMilliseconds;
-			var remain = term - used;
-			if (remain < 0) remain = 0;
-			else used += remain;
-			
-			Playtime += DeltaTime;
-			DeltaTime = (used + remain) / 1000f;
-			Thread.Sleep(remain);
+				_render.Update(Scene);
+				await _render.SaveResult(Scene);
+
+				var used = (int)_stopWatch.ElapsedMilliseconds;
+				var remain = term - used;
+				if (remain < 0) remain = 0;
+				else used += remain;
+
+				Playtime += DeltaTime;
+				DeltaTime = (used + remain) / 1000f;
+				Thread.Sleep(remain);
+			}
+
+			return;
 		}
-		return;
+		catch (Exception pError) {
+			Console.WriteLine(pError);
+		}
 	}
 }
