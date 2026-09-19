@@ -4,6 +4,7 @@ namespace Rotation.Ray;
 
 public partial class BVH {
     private enum Axis{X,Y,Z}
+    public readonly IReadOnlyList<AABBNode> Hierarchy;
     
     public BVH(IReadOnlyList<Vector> pVertices, List<TriangleIdx> pTriangleIndies, Texture? pTexture) {
         var centers = pTriangleIndies.Select(Center)
@@ -39,11 +40,13 @@ public partial class BVH {
                 }
             }
 
-            aabbs[idx].LeftIdx = aabbs.Count;
+            aabbs[idx] = aabbs[idx] with { LeftIdx= aabbs.Count };
             var start = node.TriangleIdx;
             var end = node.TriangleIdx + triangleCnt - 1;
-            var smaller = new AABBNode();
-            var bigger = new AABBNode();
+            var smallerAABB = new AABB();
+            var biggerAABB = new AABB();
+            var smallerCnt = 0;
+            var biggerCnt = 0;
             
             var pos = GetAxis(bestCenter, bestAxis);
             var findFront = false;
@@ -53,8 +56,8 @@ public partial class BVH {
                         findFront = true;
                     }
                     else {
-                        smaller.AABB.Expand(pVertices, pTriangleIndies[start]);
-                        smaller.TriangleCnt++;
+                        smallerAABB.Expand(pVertices, pTriangleIndies[start]);
+                        smallerCnt++;
                         start++;
                     }
                     continue;
@@ -63,24 +66,24 @@ public partial class BVH {
                     (pTriangleIndies[start], pTriangleIndies[end]) =
                                             (pTriangleIndies[end], pTriangleIndies[start]);
                     (centers[start], centers[end]) = (centers[end], centers[start]);
-                    smaller.AABB.Expand(pVertices, pTriangleIndies[start]);
-                    smaller.TriangleCnt++;
+                    smallerAABB.Expand(pVertices, pTriangleIndies[start]);
+                    smallerCnt++;
                     start++;
                     findFront = false;
                     
                 }
-                bigger.AABB.Expand(pVertices, pTriangleIndies[end]);
-                bigger.TriangleCnt++;
+                biggerAABB.Expand(pVertices, pTriangleIndies[end]);
+                biggerCnt++;
                 end--;
             }
 
             if (start == end) {
-                bigger.AABB.Expand(pVertices, pTriangleIndies[end]);
-                bigger.TriangleCnt++;
+                biggerAABB.Expand(pVertices, pTriangleIndies[end]);
+                biggerCnt++;
             }
 
-            smaller.TriangleIdx = node.TriangleIdx;
-            bigger.TriangleIdx = node.TriangleIdx + smaller.TriangleCnt;
+            var smaller = new AABBNode(smallerCnt, node.TriangleIdx, 0, smallerAABB);
+            var bigger = new AABBNode(biggerCnt, node.TriangleIdx + smallerCnt, 0, biggerAABB);
             aabbs.Add(smaller);
             if (!aabbs[^1].IsLeaf)
                 stack.Push(aabbs.Count - 1);
@@ -89,8 +92,8 @@ public partial class BVH {
                 stack.Push(aabbs.Count - 1);
         }
 
-        aabbs[0].AABB = new(aabbs[1].AABB, aabbs[2].AABB);
-        _hirearchy = aabbs;
+        aabbs[0] = aabbs[0] with { AABB = new(aabbs[1].AABB, aabbs[2].AABB) };
+        Hierarchy = aabbs;
 
         Vector Center(TriangleIdx pIdx) {
             var a = pVertices[pIdx.A];

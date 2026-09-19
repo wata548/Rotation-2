@@ -11,6 +11,7 @@ public record Setting(
 	bool Isolate = false,
 	bool Ascii = false,
 	bool ZBufferShading = false,
+	bool ApplyNormalMap = false,
 	bool CastShadow = false,
 	LightProcessType LightProcessType = LightProcessType.Screen
 ) {

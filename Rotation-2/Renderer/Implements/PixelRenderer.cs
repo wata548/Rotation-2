@@ -29,19 +29,48 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 			Color value = new(0,0, 0);
 			var strength = 0f;
 			if (pPointInfo[i].ZInv > 0) {
-				if (!_setting.ZBufferShading && pPointInfo[i].Triangle != null) {
+				if (_setting.ZBufferShading || pPointInfo[i].Triangle == null) {
+					strength = Math.Clamp(pPointInfo[i].ZInv, 0, 1);
+					value = new(strength, strength, strength);
+				}
+				else {
 					var pointInfo = pPointInfo[i];
 					var color = _setting.DefaultColor;
 					var texture = pointInfo.pObject!.Mesh!.Texture;
-					if (texture != null) {
-						color = texture.GetPixel(
-							pointInfo.pObject!.Mesh!.UV,
-							pointInfo.pObject!.Mesh!.TriangleIndies[pointInfo.Triangle!.Idx], 
-							pointInfo.U,
-							pointInfo.V
-						);
+					var normal = pointInfo.Triangle!.Normal;
+					var uv = pointInfo.pObject.Mesh.UV;
+					if (uv != null) {
+
+						var triangleIdx = pointInfo.pObject.Mesh.TriangleIndies[pointInfo.Triangle!.Idx];
+						if (texture != null) {
+							color = texture.GetPixel(
+								uv,
+								triangleIdx,
+								pointInfo.U,
+								pointInfo.V
+							);
+						}
+
+						if (_setting.ApplyNormalMap && pointInfo.pObject.Mesh.Normal != null) {
+							if (pointInfo.Triangle!.NeedTangentUpdate()) {
+								var ua = uv.GetVertex(triangleIdx.A);
+								var ub = uv.GetVertex(triangleIdx.B);
+								var uc = uv.GetVertex(triangleIdx.C);
+								pointInfo.Triangle.TangentUpdate(ua, ub, uc);
+							}
+
+							var pixel = pointInfo.pObject.Mesh.Normal.GetPixel(
+								uv,
+								triangleIdx,
+								pointInfo.U,
+								pointInfo.V
+							);
+							var map = new Vector(pixel.R, pixel.G, pixel.B) * 2 - Vector.One;
+							var tangent = pointInfo.Triangle!.Tangent;
+							normal = (tangent.T * map.X + tangent.B * map.Y + tangent.N * map.Z).Normalized;
+						}
 					}
-						
+					
 					var point = pointInfo.Triangle!.GetPoint(pointInfo.U, pointInfo.V);
 					strength  = 1 + _setting.Fog * point.Z;
 					strength = Math.Clamp(strength, 0, 1);
@@ -60,7 +89,7 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 							if(skip) continue;
 						}
 						
-						if(!light.CalcColor(pointInfo.Triangle!.Normal, point, out var lightColor)) continue;
+						if(!light.CalcColor(normal, point, out var lightColor)) continue;
 						color = _setting.LightProcessType switch {
 							LightProcessType.Screen => color.Screen(lightColor),
 							LightProcessType.Overlay => color.Overlay(lightColor),
@@ -70,10 +99,6 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 						};
 					}
 					value = color * strength;
-				}
-				else {
-					strength = Math.Clamp(pPointInfo[i].ZInv, 0, 1);
-					value = new(strength, strength, strength);
 				}
 			}
     				

@@ -3,15 +3,17 @@ namespace Rotation;
 
 public class Program {
     public static Logic Logic;
-	
+
     public static void Main() {
-	    
+		
         Console.Write("Frame? (60): ");
         if(!int.TryParse(Console.ReadLine()??"", out var frame)) frame = 60; 
         Console.Write("Detail? (30): ");
         if(!int.TryParse(Console.ReadLine()??"", out var detail)) detail = 30; 
         Console.Write("CastShadow? (y / N): ");
         var castShadow = (Console.ReadLine()??"").Contains('y');
+        Console.Write("Use normal map? (y / N): ");
+        var useNormal = (Console.ReadLine()??"").Contains('y');
         Console.Write("Ascii? (y / N): ");
         var ascii = (Console.ReadLine()??"").Contains('y');
         Console.Write("Isolate? (y / N): ");
@@ -34,7 +36,8 @@ public class Program {
             Ascii: ascii,
             ZBufferShading: false,
 	        LightProcessType: LightProcessType.SoftLight,
-			CastShadow: castShadow   
+			CastShadow: castShadow,
+	        ApplyNormalMap: useNormal
         );
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");

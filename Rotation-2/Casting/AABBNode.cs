@@ -1,13 +1,9 @@
 namespace Rotation.Ray;
 
 public partial class BVH {
-    private class AABBNode {
+    public record struct AABBNode(int TriangleCnt, int TriangleIdx, int LeftIdx, AABB AABB) {
         public const int MaxLeafTriangleCnt = 3;
-        public int TriangleCnt { get; set; }
-        public int TriangleIdx { get; set; }
-        public int LeftIdx { get; set; }
         public int RightIdx => LeftIdx + 1;
-        public AABB AABB { get; set; } = new();
         public bool IsLeaf => TriangleCnt <= MaxLeafTriangleCnt;
     }
 }

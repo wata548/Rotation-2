@@ -1,13 +1,13 @@
 namespace Rotation.UV;
 
 public class UVMap {
-	public record struct UVCoord(float X, float Y) {
+	public record struct UVCoord(float U, float V) {
 		public static UVCoord operator +(UVCoord pLhs, UVCoord pRhs) =>
-			new(pLhs.X + pRhs.X, pLhs.Y + pRhs.Y);
+			new(pLhs.U + pRhs.U, pLhs.V + pRhs.V);
 		public static UVCoord operator -(UVCoord pLhs, UVCoord pRhs) =>
-			new(pLhs.X - pRhs.X, pLhs.Y - pRhs.Y);
+			new(pLhs.U - pRhs.U, pLhs.V - pRhs.V);
 		public static UVCoord operator *(float pLhs, UVCoord pRhs) =>
-			new(pLhs * pRhs.X, pLhs * pRhs.Y);
+			new(pLhs * pRhs.U, pLhs * pRhs.V);
 	}
 
 	public void AddCoords(IEnumerable<UVCoord> pCoords) =>
@@ -18,7 +18,7 @@ public class UVMap {
 			triIdx => {
 				var u = _coords[triIdx.B] - _coords[triIdx.A];
 				var v = _coords[triIdx.C] - _coords[triIdx.A];
-				return u.X * v.Y - u.Y * v.X;
+				return u.U * v.V - u.V * v.U;
 			}).ToList();
 	}
 
@@ -29,9 +29,9 @@ public class UVMap {
 		var b = _coords[pIdx.B];
 		var c = _coords[pIdx.C];
 		var coord = pU * (b - a) + pV * (c - a);
-		var x = coord.X % 1;
+		var x = coord.U % 1;
 		if (x < 0) x += 1;
-		var y = coord.Y % 1;
+		var y = coord.V % 1;
 		if (y < 0) y += 1;
 		return new(x,y);
 	}

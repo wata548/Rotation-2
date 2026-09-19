@@ -37,8 +37,8 @@ public class Texture{
 
 	public Color GetPixel(UVMap pUV, TriangleIdx pIdx, float pU, float pV) {
 		var coord = pUV.Get(pIdx, pU, pV);
-		var x = (int)MathF.Round((_width - 1) * coord.X);
-		var y = (int)MathF.Round((_height - 1) * (1 - coord.Y));
+		var x = (int)MathF.Round((_width - 1) * coord.U);
+		var y = (int)MathF.Round((_height - 1) * (1 - coord.V));
 		return _map[x + _width * y];
 	}
 	public void Save(string pName) {

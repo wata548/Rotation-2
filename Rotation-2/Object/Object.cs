@@ -93,13 +93,42 @@ public class Object: ITransform {
 		}
 
 		foreach (var triangle in _triangles) {
-			triangle.NormalRecalculate();
+			triangle.NormalUpdate();
 		}
 	}
 
-	public RayResult RayCasting(Ray.Ray pRay) =>
-		Mesh?.BVH.RayCasting(Mesh, this, pRay) ?? new(default, 2);
-
+	public RayResult RayCasting(Ray.Ray pRay) {
+		if (Mesh == null) return new(null, 2);
+		var localRay = pRay.ApplyTransform(this);
+		var stack = new Stack<int>();
+		var result = new RayResult(default, 2);
+		stack.Push(0);
+		while (stack.Count > 0) {
+			var node = Mesh.BVH.Hierarchy[stack.Pop()];
+			if(!localRay.VsAABB(node.AABB, result.Ratio)) 
+				continue;
+    
+			if (!node.IsLeaf) {
+				stack.Push(node.LeftIdx);
+				stack.Push(node.RightIdx);
+				continue;
+			}
+    
+			for (int i = 0; i < node.TriangleCnt; i++) {
+				var triangle = Mesh.TriangleIndies[node.TriangleIdx + i];
+				var vsTriangle = localRay.VsTriangle(
+					Mesh.Vertices,
+					triangle,
+					out var t
+				);
+				if (vsTriangle && t < result.Ratio) {
+					result = new(triangle, t);
+				}
+			}
+		}
+		return result;
+	}
+	
 	public void Update() {
 		if(Mesh?.NeedUpdate() ?? false) 
 			MeshUpdate();
