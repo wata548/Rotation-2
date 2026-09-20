@@ -13,7 +13,7 @@ public class LoadFbxScene: IScene {
 	public string OtherData => "";
 	private readonly float _speed;
 	private readonly Vector Pos;
-	private const float MoveSpeed = 1;
+	private const float MoveCycle = 5f;
 	private const float MoveTerm = 2;
 	
 	public LoadFbxScene(Setting pSetting) {
@@ -46,7 +46,6 @@ public class LoadFbxScene: IScene {
 		var size = existWall
 			? new Vector(0.1f, 0.1f, 0.003f)
 			: new Vector(30, 30, 1);
-			
 		_objs.Add( new Object {
 			Pos = new(0, 0, -8),
 			Scale = size,
@@ -55,18 +54,34 @@ public class LoadFbxScene: IScene {
 		});
 		Pos = _objs[0].Pos;
 		_lights.Add(new SpotLight() {
-			Color = new Color("ffffff") * 3,
+			Color = new Color("eb88e2") * 1,
 			Pos = pSetting.CameraPos + Vector.Up * 8,
-			Strength = 50
+			Strength = 30
+		});
+		_lights.Add(new SpotLight() {
+			Color = new Color("7ab5f0") * 1,
+			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Strength = 30
+		});
+		_lights.Add(new SpotLight() {
+			Color = new Color("f0e48d") * 1,
+			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Strength = 30
 		});
 	}
     
 	public void Update(Setting pSetting) {
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
-		_objs[0].Pos = Pos + Vector.Up * (MathF.Sin(MoveSpeed * Single.Pi * Program.Logic.Playtime) * 0.5f * MoveTerm);
-		var delta = new Vector(MathF.Cos(MoveSpeed * Single.Pi * Program.Logic.Playtime),
-			MathF.Sin(MoveSpeed * Single.Pi * Program.Logic.Playtime)) * 0.5f * MoveTerm * 10;
-		_lights[0].Pos = pSetting.CameraPos + Vector.Up * 8 + delta;
+		var t = Single.Pi / MoveCycle ;
+		_objs[0].Pos = Pos + Vector.Up * (MathF.Sin(t * Program.Logic.Playtime) * 0.5f * MoveTerm);
+		var delta = (Func<float, Vector>)(term =>  new Vector(
+			MathF.Cos(t * (Program.Logic.Playtime - 2 * MoveCycle * term)),
+			MathF.Sin(t * (Program.Logic.Playtime - 2 * MoveCycle * term))
+		) * 0.5f * MoveTerm * 10);
+		var center = pSetting.CameraPos - Vector.Up * 3;
+		_lights[0].Pos = center + delta(0);
+		_lights[1].Pos = center + delta(1/3f);
+		_lights[2].Pos = center + delta(2/3f);
 	}
 }

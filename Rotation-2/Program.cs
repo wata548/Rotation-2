@@ -27,15 +27,15 @@ public class Program {
         var setting = new Setting(
 	        new(13, 13),
 	        Vector.Zero,
-	        new("aaaaaa"),
+	        new("555555"),
             frame,
             detail, 
-            Fog: 0.1f,
+            Fog: 0.05f,
             FOV: 109,
             Isolate: isolate,
             Ascii: ascii,
             ZBufferShading: false,
-	        LightProcessType: LightProcessType.SoftLight,
+	        LightProcessType: LightProcessType.Screen,
 			CastShadow: castShadow,
 	        ApplyNormalMap: useNormal
         );
