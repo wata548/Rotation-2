@@ -38,7 +38,7 @@ public class LoadFbxScene: IScene {
 			Mesh = mesh,
 			Rotation = Quaternion.Euler(0, 0, 0)
 		});
-
+		
 		var existWall = File.Exists("Models/normal.fbx");
 		var wall = existWall
 			? loader.Load("Models/normal.fbx", true)

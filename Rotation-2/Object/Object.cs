@@ -71,7 +71,6 @@ public class Object: ITransform {
 	}
 	private void MeshUpdate() {
 		if (Mesh == null) return;
-		Mesh.UV?.SetDets(Mesh.TriangleIndies);	
 		_triangles = Mesh.TriangleIndies.Select((idxs, idx) => new Triangle(
 			idx, 
 			[
