@@ -60,7 +60,7 @@ public class Test: IScene {
 		Pos = _objs[0].Pos;
 		_lights.Add(new() {
 			Color = new Color("ffffff") * 3,
-			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Pos = pSetting.Camera.Pos + Vector.Up * 8,
 			Strength = 50
 		});
 		

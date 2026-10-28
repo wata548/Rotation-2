@@ -38,7 +38,8 @@ public class LoadFbxScene: IScene {
 			Mesh = mesh,
 			Rotation = Quaternion.Euler(0, 0, 0)
 		});
-		
+
+		var cameraPos = pSetting.Camera.Pos;
 		var existWall = File.Exists("Models/normal.fbx");
 		var wall = existWall
 			? loader.Load("Models/normal.fbx", true)
@@ -55,17 +56,17 @@ public class LoadFbxScene: IScene {
 		Pos = _objs[0].Pos;
 		_lights.Add(new SpotLight() {
 			Color = new Color("eb88e2") * 1,
-			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Pos = cameraPos + Vector.Up * 8,
 			Strength = 30
 		});
 		_lights.Add(new SpotLight() {
 			Color = new Color("7ab5f0") * 1,
-			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Pos = cameraPos + Vector.Up * 8,
 			Strength = 30
 		});
 		_lights.Add(new SpotLight() {
 			Color = new Color("f0e48d") * 1,
-			Pos = pSetting.CameraPos + Vector.Up * 8,
+			Pos = cameraPos + Vector.Up * 8,
 			Strength = 30
 		});
 	}
@@ -73,13 +74,15 @@ public class LoadFbxScene: IScene {
 	public void Update(Setting pSetting) {
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
+		pSetting.Camera.Rotation = q1 * pSetting.Camera.Rotation;
+		
 		var t = Single.Pi / MoveCycle ;
 		_objs[0].Pos = Pos + Vector.Up * (MathF.Sin(t * Program.Logic.Playtime) * 0.5f * MoveTerm);
 		var delta = (Func<float, Vector>)(term =>  new Vector(
 			MathF.Cos(t * (Program.Logic.Playtime - 2 * MoveCycle * term)),
 			MathF.Sin(t * (Program.Logic.Playtime - 2 * MoveCycle * term))
 		) * 0.5f * MoveTerm * 10);
-		var center = pSetting.CameraPos - Vector.Up * 3;
+		var center = pSetting.Camera.Pos - Vector.Up * 3;
 		_lights[0].Pos = center + delta(0);
 		_lights[1].Pos = center + delta(1/3f);
 		_lights[2].Pos = center + delta(2/3f);

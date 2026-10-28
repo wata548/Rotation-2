@@ -11,7 +11,6 @@ public class Object: ITransform {
 			_needUpdate = true;
 		}
 	} = default;
-
 	public Vector Scale {
 		get;
 		set {
@@ -19,7 +18,6 @@ public class Object: ITransform {
 			_needUpdate = true;
 		}
 	} = Vector.One;
-
 	public Quaternion Rotation {
 		get;
 		set {
@@ -80,7 +78,6 @@ public class Object: ITransform {
 			])
 		).ToList();
 	}
-	
 	private void VertexPositionUpdate() {
 		if (Mesh == null) return;
 		if (!_needUpdate) return;
@@ -95,7 +92,6 @@ public class Object: ITransform {
 			triangle.NormalUpdate();
 		}
 	}
-
 	public RayResult RayCasting(Ray.Ray pRay) {
 		if (Mesh == null) return new(null, 2);
 		var localRay = pRay.ApplyTransform(this);

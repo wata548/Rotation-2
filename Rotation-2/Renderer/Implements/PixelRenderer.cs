@@ -19,6 +19,7 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 		Color prev = new(0,0,0);
 		var curPixel = "  ";
 		result.Append("|");
+		//var placeholder = 0.01f;
 		for (int i = 0; i < _screenSize; i++) {
     				
 			if (i != 0 && i % _setting.ScreenSize.X == 0) {
@@ -99,6 +100,11 @@ public class PixelRenderer(Setting pSetting, string pBrightString = " .;-=+*#%@"
 						};
 					}
 					value = color * strength;
+					/*Triangle outline
+					 if (pointInfo.U < placeholder || pointInfo.V < placeholder ||
+						Math.Abs(pointInfo.U + pointInfo.V - 1) < placeholder)
+						value = new(0, 120, 0);
+					*/
 				}
 			}
     				

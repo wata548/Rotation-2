@@ -23,15 +23,20 @@ public class Render {
 		Array.Fill(_colors, new(0, 0,0));
 		Array.Fill(_pointInfo, new(null, 0, 0,0,null));
 		_renderedTriangleCnt = 0;
+		var cameraPos = _setting.Camera.Pos;
+		var vd = _setting.ViewDirection;
 		foreach (var obj in pScene.Objs) {
 			foreach (var triangle in obj.Triangles) {
-				
-				var isBackFace = -triangle.Normal.Dot(_setting.Isolate
-					? _setting.ViewDirection
-					: (triangle.Middle - _setting.CameraPos).Normalized
-				);
-				
-				if (isBackFace < 1e-5) continue;
+
+				if (_setting.Isolate) {
+					if(triangle.Normal.Dot(vd) > -1e-5) continue;
+				}
+				else {
+					var diff = (triangle.Middle - cameraPos).Normalized;
+					if(triangle.Normal.Dot(diff) > -1e-5) continue;
+					if(vd.Dot(diff) < 1e-5) continue;
+				}
+					
 				_renderedTriangleCnt++;
 				
 				//count == 1 / (u term, v term)
@@ -41,8 +46,7 @@ public class Render {
 				Fill(obj, triangle, 0, 1);
 				Fill(obj, triangle, 1, 0);
 				for (float i = 0; i < 1; i += uTerm) {
-					for (float j = 0; j < 1; j += vTerm) {
-						if (i + j > 1) break;
+					for (float j = 0; i + j <= 1; j += vTerm) {
 						Fill(obj, triangle, i,j);
 					}
 				}	
@@ -51,20 +55,20 @@ public class Render {
 		return;
 
 		Vector ToCameraSpace(Vector pPos) {
-			var ratio = _setting.CameraDistance / (_setting.CameraDistance - pPos.Z);
-			return pPos * ratio;	
+			var diff = pPos - cameraPos;
+			var vdFactor = vd.Dot(diff) / vd.Dot(vd);
+			return diff / vdFactor;
 		}
 
 		void Fill(Object pObj,Triangle pTriangle, float pU, float pV) {
-			var point = pTriangle.GetPoint(pU, pV);
-			var fixedPoint = point; 
+			var fixedPoint = pTriangle.GetPoint(pU, pV);
 			fixedPoint.Y *= -1;
-			var z = -fixedPoint.Z;
+			var z = (fixedPoint - cameraPos).SqDistance;
 			
 			if (!_setting.Isolate)
 				fixedPoint = ToCameraSpace(fixedPoint);
 			
-			fixedPoint = ((fixedPoint - _setting.OriginDelta) * _setting.CoordDetail).Map(MathF.Round);
+			fixedPoint = ((fixedPoint + _setting.ScreenDelta) * _setting.CoordDetail).Map(MathF.Round);
 			if (fixedPoint.X < 0 || fixedPoint.X >= _setting.ScreenSize.X
 				|| fixedPoint.Y < 0 || fixedPoint.Y >= _setting.ScreenSize.Y)
 				return;

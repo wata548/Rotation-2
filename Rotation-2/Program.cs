@@ -26,19 +26,22 @@ public class Program {
 
         var setting = new Setting(
 	        new(13, 13),
-	        Vector.Zero,
 	        new("555555"),
-            frame,
-            detail, 
-            Fog: 0.05f,
-            FOV: 109,
-            Isolate: isolate,
-            Ascii: ascii,
-            ZBufferShading: false,
+	        frame,
+	        detail,
+	        Fog: 0.05f,
+	        Isolate: isolate,
+	        Ascii: ascii,
+	        ZBufferShading: false,
 	        LightProcessType: LightProcessType.Screen,
-			CastShadow: castShadow,
+	        CastShadow: castShadow,
 	        ApplyNormalMap: useNormal
-        );
+        ) {
+	        Camera = new Camera{
+		        FOV = 109, 
+		        Pos = Vector.Backward * 4,
+	        }
+        };
         
         if (sceneType == null) throw new ArgumentException($"{sceneName} isn't exist. Check again");
         var scene =  Activator.CreateInstance(sceneType, setting) as IScene;
