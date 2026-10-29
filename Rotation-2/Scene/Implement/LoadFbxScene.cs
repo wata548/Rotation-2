@@ -1,3 +1,4 @@
+using Rotation.Input;
 using Rotation.Light;
 using Rotation.Ray;
 using Rotation.UV;
@@ -70,11 +71,13 @@ public class LoadFbxScene: IScene {
 			Strength = 30
 		});
 	}
-    
+
 	public void Update(Setting pSetting) {
+		
+		pSetting.Camera.Pos += Device.SimpleMove() * Program.Logic.DeltaTime * 10; 
 		var q1 = Quaternion.Euler(0, _speed * Program.Logic.DeltaTime, 0);
 		_objs[0].Rotation = q1 * _objs[0].Rotation;
-		pSetting.Camera.Rotation = q1 * pSetting.Camera.Rotation;
+		pSetting.Camera.Rotation = Device.SimpleRotate(40, pSetting.Camera.Rotation);
 		
 		var t = Single.Pi / MoveCycle ;
 		_objs[0].Pos = Pos + Vector.Up * (MathF.Sin(t * Program.Logic.Playtime) * 0.5f * MoveTerm);
