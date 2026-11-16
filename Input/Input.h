@@ -1,6 +1,9 @@
 #ifndef INPUT_LIBRARY_H
 #define INPUT_LIBRARY_H
 
+#include <windows.h>
+#include <iostream>
+
 extern "C" {
 __declspec(dllexport) bool KeyDown(int);
 __declspec(dllexport) float GetMouseX();

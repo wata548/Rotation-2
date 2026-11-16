@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Rotation;
 
 public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
@@ -93,5 +95,30 @@ public struct Vector(float pX = 0,float pY = 0,float pZ = 0) {
 	public override int GetHashCode() =>
 		HashCode.Combine(X, Y, Z);
 
-	#endregion
+#endregion
+
+	public static Vector Parse(string s) {
+		s = s.Replace('(', ' ');
+		s = s.Replace(')', ' ');
+		var split = s.Split(',');
+		var (x, y, z) = (0f, 0f, 0f);
+		float.TryParse(split[0], out x);
+		if (split.Length >= 2) float.TryParse(split[1], out y);
+		if (split.Length >= 3) float.TryParse(split[2], out z);
+		return new(x,y,z);
+	}
+	public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Vector result) {
+		result = Zero; 
+		if (s == null || string.IsNullOrWhiteSpace(s)) return false;
+		s = s.Replace('(', ' ');
+		s = s.Remove(')', ' ');
+		var split = s.Split(',');
+		
+		var (x, y, z) = (0f, 0f, 0f);
+		float.TryParse(split[0], out x);
+		if (split.Length >= 2) float.TryParse(split[1], out y);
+		if (split.Length >= 3) float.TryParse(split[2], out z);
+		result = new(x,y,z);
+		return true;
+	}
 }

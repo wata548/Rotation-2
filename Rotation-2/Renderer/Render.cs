@@ -14,7 +14,7 @@ public class Render {
 	public Render(Setting pSetting, IRenderer pRenderer) {
 		_setting = pSetting;
 		_renderer = pRenderer;
-		var screenSize = (int)pSetting.ScreenSize.X * (int)pSetting.ScreenSize.Y;
+		var screenSize = (int)pSetting.ScreenSize.X * (int)pSetting.ScreenSize.Y * pSetting.CoordDetail;
 		_pointInfo = new PointInfo[screenSize];
 		_colors = new Color[screenSize];
 	}

@@ -1,4 +1,5 @@
 ﻿using Rotation.Input;
+using Rotation.Preset;
 
 namespace Rotation;
 
@@ -14,7 +15,7 @@ public class Program {
 			ApplyNormalMap: true,
 			Ascii: false,
 			Isolate: false,
-			Fog: 0.05f,
+			Fog: 0.0f,
 			ZBufferShading: false,
 			LightProcessType: LightProcessType.Screen
 		) {
@@ -24,7 +25,8 @@ public class Program {
 			}
 		};
 
-		if (!BoolInput("Use default setting", true)) {
+		
+		if (!BoolInput("Use Preset", true)) {
 			setting = setting with {
 				Frame = ValueInput("Frame", setting.Frame),
 				CoordDetail = ValueInput("Detail", setting.CoordDetail),
@@ -34,8 +36,9 @@ public class Program {
 				Isolate = BoolInput("Isolate", setting.Isolate),
 			};	
 		}
+		else
+			setting = PresetReader.LoadPreset(ValueInput("Input target file", "Default"), setting);
 
-		var a = setting with { };
 		var sceneName = ValueInput("Scene name", "LoadFbxScene");
 		var sceneType = Type.GetType($"Rotation.Scene.{sceneName}");
 		

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Rotation;
@@ -17,8 +18,8 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 
 	public bool Equals(Color pRhs) {
 		var diff = MathF.Abs(R - pRhs.R) 
-		           + MathF.Abs(G - pRhs.G) 
-		           + MathF.Abs(B - pRhs.B);
+			+ MathF.Abs(G - pRhs.G) 
+			+ MathF.Abs(B - pRhs.B);
 		return diff <= 1e-5;		
 	}
 	
@@ -113,12 +114,12 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 			return 1 - (1 - pA) * (1 - pB) * 2;
 		}
 	}
-	 public Color HardLight(Color pRhs) {
-		 return Map(Impl, pRhs);
-		 float Impl(float pA, float pB) {
-			 if (pB < 0.5f) return 2 * pA * pB;
-			 return 1 - (1 - pA) * (1 - pB) * 2;
-		 }
+	public Color HardLight(Color pRhs) {
+		return Map(Impl, pRhs);
+		float Impl(float pA, float pB) {
+			if (pB < 0.5f) return 2 * pA * pB;
+			return 1 - (1 - pA) * (1 - pB) * 2;
+		}
 	}
 	public Color SoftLight(Color pRhs) {
 		return Map(Impl, pRhs);
@@ -126,5 +127,18 @@ public struct Color(float pR = 1, float pG = 1, float pB = 1) {
 			if (pB < 0.5f) return pA - (1 - 2 * pB) * pA * (1 - pA);
 			return pA + (2 * pB - 1) * (MathF.Sqrt(pA) - pA);
 		}
+	}
+
+	public static Color Parse(string s) => new(s);
+	public static bool TryParse([NotNullWhen(true)] string? s, IFormatProvider? provider, out Color result) {
+		result = new(); 
+		if (s == null) return false;
+		try {
+			result = new(s);
+		}
+		catch {
+			return false;
+		}
+		return true;
 	}
 }
